@@ -304,16 +304,12 @@ class _CameraViewState extends State<CameraView> {
   }
 
   Future<bool> requestPermission() async {
-    if (await Permission.camera.request().isGranted) {
-      return Future.value(true);
-    }
+    PermissionStatus status = await Permission.camera.request();
 
-    Map<Permission, PermissionStatus> statuses =
-        await [Permission.camera].request();
-
-    if (await Permission.camera.request().isGranted) {
+    if (status == PermissionStatus.granted) {
       return Future.value(true);
     } else {
+      print("@@@ CameraView.requestPermission(): ${status}");
       return Future.value(false);
     }
   }
