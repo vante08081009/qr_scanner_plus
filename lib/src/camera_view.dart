@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'package:camera/camera.dart';
@@ -36,6 +37,7 @@ class _CameraViewState extends State<QrScannerCameraPlusView> {
 
   int _cameraIndex = 0;
   double zoomLevel = 1, minZoomLevel = 1, maxZoomLevel = 1;
+  double zoomTarget = 0, _lastGestureScale = 1;
   final bool _allowPicker = true;
   bool _changingCameraLens = false;
 
@@ -93,19 +95,43 @@ class _CameraViewState extends State<QrScannerCameraPlusView> {
     return _liveFeedBody();
   }
 
+  void _handleCameraZoomChange() {
+    Timer.periodic(Duration(milliseconds: 20), (timer) {
+      if (_controller == null || _controller?.value.isInitialized == false) {
+        return;
+      }
+      if (zoomTarget != 0) {
+        zoomLevel = zoomLevel + zoomTarget;
+
+        if (zoomLevel < minZoomLevel) {
+          zoomLevel = minZoomLevel;
+        } else if (zoomLevel > min(maxZoomLevel, 3)) {
+          zoomLevel = min(maxZoomLevel, 3);
+        }
+        _controller?.setZoomLevel(zoomLevel);
+      }
+    });
+  }
+
   Widget _liveFeedBody() {
     return GestureDetector(
       child: _cameraBody(),
       onScaleUpdate: (ScaleUpdateDetails details) {
         double scale = details.scale;
 
-        if (scale > 1) {
-          zoomLevel = min(maxZoomLevel, scale);
-        } else if (scale < 1) {
-          zoomLevel = max(minZoomLevel, zoomLevel * scale);
+        if (scale - _lastGestureScale > 0.005) {
+          zoomTarget = 0.3;
+        } else if (_lastGestureScale - scale > 0.005) {
+          zoomTarget = -0.3;
+        } else {
+          zoomTarget = 0;
         }
 
-        _controller?.setZoomLevel(zoomLevel);
+        _lastGestureScale = scale;
+      },
+      onScaleEnd: (ScaleEndDetails details) {
+        zoomTarget = 0;
+        _lastGestureScale = 1;
       },
     );
   }
@@ -170,7 +196,8 @@ class _CameraViewState extends State<QrScannerCameraPlusView> {
         maxZoomLevel = value;
       });
       _controller?.startImageStream(_processCameraImage);
-      setState(() {});
+
+      _handleCameraZoomChange();
     });
   }
 
@@ -187,19 +214,6 @@ class _CameraViewState extends State<QrScannerCameraPlusView> {
     await _stopLiveFeed();
     await _startLiveFeed();
     setState(() => _changingCameraLens = false);
-  }
-
-  Future _processPickedFile(XFile? pickedFile) async {
-    final path = pickedFile?.path;
-    if (path == null) {
-      return;
-    }
-    setState(() {
-      _image = File(path);
-    });
-    _path = path;
-    final inputImage = InputImage.fromFilePath(path);
-    widget.onImage(inputImage);
   }
 
   Future _processCameraImage(CameraImage image) async {
@@ -251,7 +265,7 @@ class _CameraViewState extends State<QrScannerCameraPlusView> {
         status == PermissionStatus.limited) {
       return Future.value(true);
     } else {
-      print("@@@ CameraView.requestPermission(): ${status}");
+      print("@@@ QrScannerCameraPlusView.requestPermission(): ${status}");
       return Future.value(false);
     }
   }
