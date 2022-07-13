@@ -1,23 +1,19 @@
 import 'dart:io';
-
+import 'dart:math';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:google_mlkit_commons/google_mlkit_commons.dart';
 
-List<CameraDescription> cameras = [];
-
-enum ScreenMode { liveFeed, gallery }
-
-class CameraView extends StatefulWidget {
-  CameraView(
+class QrScannerCameraPlusView extends StatefulWidget {
+  const QrScannerCameraPlusView(
       {Key? key,
       required this.title,
       required this.customPaint,
       this.text,
+      this.onCameraPermissionDenied,
       required this.onImage,
-      this.onScreenModeChanged,
       this.initialDirection = CameraLensDirection.back})
       : super(key: key);
 
@@ -25,21 +21,21 @@ class CameraView extends StatefulWidget {
   final CustomPaint? customPaint;
   final String? text;
   final Function(InputImage inputImage) onImage;
-  final Function(ScreenMode mode)? onScreenModeChanged;
+  final Function()? onCameraPermissionDenied;
   final CameraLensDirection initialDirection;
 
   @override
   _CameraViewState createState() => _CameraViewState();
 }
 
-class _CameraViewState extends State<CameraView> {
-  ScreenMode _mode = ScreenMode.liveFeed;
+class _CameraViewState extends State<QrScannerCameraPlusView> {
   CameraController? _controller;
   File? _image;
   String? _path;
+  List<CameraDescription> cameras = [];
 
   int _cameraIndex = 0;
-  double zoomLevel = 0.0, minZoomLevel = 0.0, maxZoomLevel = 0.0;
+  double zoomLevel = 1, minZoomLevel = 1, maxZoomLevel = 1;
   final bool _allowPicker = true;
   bool _changingCameraLens = false;
 
@@ -82,53 +78,15 @@ class _CameraViewState extends State<CameraView> {
 
           _startLiveFeed();
         });
+      } else {
+        widget.onCameraPermissionDenied?.call();
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: [
-          if (_allowPicker)
-            Padding(
-              padding: EdgeInsets.only(right: 20.0),
-              child: GestureDetector(
-                onTap: _switchScreenMode,
-                child: Icon(
-                  _mode == ScreenMode.liveFeed
-                      ? Icons.photo_library_outlined
-                      : (Platform.isIOS
-                          ? Icons.camera_alt_outlined
-                          : Icons.camera),
-                ),
-              ),
-            ),
-        ],
-      ),
-      body: _body(),
-      floatingActionButton: _floatingActionButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-    );
-  }
-
-  Widget? _floatingActionButton() {
-    if (_mode == ScreenMode.gallery) return null;
-    if (cameras.length == 1) return null;
-    return SizedBox(
-        height: 70.0,
-        width: 70.0,
-        child: FloatingActionButton(
-          child: Icon(
-            Platform.isIOS
-                ? Icons.flip_camera_ios_outlined
-                : Icons.flip_camera_android_outlined,
-            size: 40,
-          ),
-          onPressed: _switchLiveCamera,
-        ));
+    return _body();
   }
 
   Widget _body() {
@@ -136,6 +94,23 @@ class _CameraViewState extends State<CameraView> {
   }
 
   Widget _liveFeedBody() {
+    return GestureDetector(
+      child: _cameraBody(),
+      onScaleUpdate: (ScaleUpdateDetails details) {
+        double scale = details.scale;
+
+        if (scale > 1) {
+          zoomLevel = min(maxZoomLevel, scale);
+        } else if (scale < 1) {
+          zoomLevel = max(minZoomLevel, zoomLevel * scale);
+        }
+
+        _controller?.setZoomLevel(zoomLevel);
+      },
+    );
+  }
+
+  Widget _cameraBody() {
     if (_controller == null || _controller?.value.isInitialized == false) {
       return const SizedBox.shrink();
     }
@@ -171,43 +146,9 @@ class _CameraViewState extends State<CameraView> {
             ),
           ),
           if (widget.customPaint != null) widget.customPaint!,
-          Positioned(
-            bottom: 100,
-            left: 50,
-            right: 50,
-            child: Slider(
-              value: zoomLevel,
-              min: minZoomLevel,
-              max: maxZoomLevel,
-              onChanged: (newSliderValue) {
-                setState(() {
-                  zoomLevel = newSliderValue;
-                  _controller!.setZoomLevel(zoomLevel);
-                });
-              },
-              divisions: (maxZoomLevel - 1).toInt() < 1
-                  ? null
-                  : (maxZoomLevel - 1).toInt(),
-            ),
-          )
         ],
       ),
     );
-  }
-
-  void _switchScreenMode() {
-    _image = null;
-    if (_mode == ScreenMode.liveFeed) {
-      _mode = ScreenMode.gallery;
-      _stopLiveFeed();
-    } else {
-      _mode = ScreenMode.liveFeed;
-      _startLiveFeed();
-    }
-    if (widget.onScreenModeChanged != null) {
-      widget.onScreenModeChanged!(_mode);
-    }
-    setState(() {});
   }
 
   Future _startLiveFeed() async {
@@ -306,7 +247,8 @@ class _CameraViewState extends State<CameraView> {
   Future<bool> requestPermission() async {
     PermissionStatus status = await Permission.camera.request();
 
-    if (status == PermissionStatus.granted) {
+    if (status == PermissionStatus.granted ||
+        status == PermissionStatus.limited) {
       return Future.value(true);
     } else {
       print("@@@ CameraView.requestPermission(): ${status}");

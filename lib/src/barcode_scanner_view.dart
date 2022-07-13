@@ -25,7 +25,7 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView> {
 
   @override
   Widget build(BuildContext context) {
-    return CameraView(
+    return QrScannerCameraPlusView(
       title: 'Barcode Scanner',
       customPaint: _customPaint,
       text: _text,
