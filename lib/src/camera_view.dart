@@ -26,7 +26,8 @@ class QrScannerCameraPlusView extends StatefulWidget {
   _CameraViewState createState() => _CameraViewState();
 }
 
-class _CameraViewState extends State<QrScannerCameraPlusView> {
+class _CameraViewState extends State<QrScannerCameraPlusView>
+    with WidgetsBindingObserver {
   CameraController? _controller;
   File? _image;
   String? _path;
@@ -44,12 +45,21 @@ class _CameraViewState extends State<QrScannerCameraPlusView> {
   void initState() {
     super.initState();
 
-    _initCamera();
+    if (mounted) {
+      _initCamera();
+
+      // Listen to background/resume changes
+      WidgetsBinding.instance?.addObserver(this);
+    }
   }
 
   @override
   void dispose() {
     _stopLiveFeed();
+
+    // Remove background/resume changes listener
+    WidgetsBinding.instance?.removeObserver(this);
+
     super.dispose();
   }
 
@@ -185,9 +195,7 @@ class _CameraViewState extends State<QrScannerCameraPlusView> {
     var scale = 9 / 16;
     try {
       scale = size.aspectRatio * _controller!.value.aspectRatio;
-    } catch (e) {
-      print(e);
-    }
+    } catch (e) {}
 
     // to prevent scaling down, invert the value
     if (scale < 1) scale = 1 / scale;
@@ -214,6 +222,10 @@ class _CameraViewState extends State<QrScannerCameraPlusView> {
   }
 
   Future _startLiveFeed() async {
+    if (!mounted) {
+      return;
+    }
+
     final camera = cameras[_cameraIndex];
     _controller = CameraController(
       camera,
@@ -238,6 +250,9 @@ class _CameraViewState extends State<QrScannerCameraPlusView> {
   }
 
   Future _stopLiveFeed() async {
+    if (!mounted) {
+      return;
+    }
     await _controller?.stopImageStream();
     await _controller?.dispose();
     _controller = null;
@@ -303,6 +318,19 @@ class _CameraViewState extends State<QrScannerCameraPlusView> {
     } else {
       print("@@@ QrScannerCameraPlusView.requestPermission(): ${status}");
       return Future.value(false);
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    super.didChangeAppLifecycleState(state);
+
+    print("@@@ didChangeAppLifecycleState {$state}");
+
+    if (state == AppLifecycleState.resumed) {
+      _initCamera();
+    } else if (state == AppLifecycleState.paused) {
+      _stopLiveFeed();
     }
   }
 }
