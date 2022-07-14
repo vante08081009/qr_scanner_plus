@@ -115,34 +115,33 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
     saveResultCache(tmpBarcodes);
 
     //callback result every 0.5s
-    if (_timerCallbackResult?.isActive ?? false == false) {
-      _timerCallbackResult = Timer(const Duration(milliseconds: 300), () {
-        if (resultCache.isNotEmpty) {
-          if (widget.stop != true) {
-            widget.onResult.call(resultCache);
-          }
-
-          if (widget.debug == true) {
-            if (inputImage.inputImageData?.size != null &&
-                inputImage.inputImageData?.imageRotation != null) {
-              final painter = BarcodeDetectorDebugPainter(
-                  resultCache,
-                  inputImage.inputImageData!.size,
-                  inputImage.inputImageData!.imageRotation);
-
-              setState(() {
-                _customPaint = CustomPaint(painter: painter);
-              });
-            }
-          }
-        } else {
-          setState(() {
-            _customPaint = null;
-          });
+    _timerCallbackResult ??=
+        Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      if (resultCache.isNotEmpty) {
+        if (widget.stop != true) {
+          widget.onResult.call(resultCache);
         }
-      });
-    }
 
+        if (widget.debug == true) {
+          if (inputImage.inputImageData?.size != null &&
+              inputImage.inputImageData?.imageRotation != null) {
+            final painter = BarcodeDetectorDebugPainter(
+                resultCache,
+                inputImage.inputImageData!.size,
+                inputImage.inputImageData!.imageRotation);
+
+            setState(() {
+              _customPaint = CustomPaint(painter: painter);
+            });
+          }
+        }
+      } else {
+        setState(() {
+          _customPaint = null;
+        });
+      }
+    });
+    setState(() {});
     _isBusy = false;
   }
 }
