@@ -8,8 +8,8 @@ import 'package:sensors_plus/sensors_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:google_mlkit_commons/google_mlkit_commons.dart';
 
-class QrScannerCameraPlusView extends StatefulWidget {
-  const QrScannerCameraPlusView(
+class CameraView extends StatefulWidget {
+  const CameraView(
       {Key? key,
       required this.customPaint,
       this.onCameraPermissionDenied,
@@ -26,8 +26,7 @@ class QrScannerCameraPlusView extends StatefulWidget {
   _CameraViewState createState() => _CameraViewState();
 }
 
-class _CameraViewState extends State<QrScannerCameraPlusView>
-    with WidgetsBindingObserver {
+class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   CameraController? _controller;
   File? _image;
   String? _path;

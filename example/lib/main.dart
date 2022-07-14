@@ -33,6 +33,13 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget _buildBarcodeScannerView() {
-    return BarcodeScannerView();
+    return QrScannerPlusView(
+      _onResult,
+      debug: true,
+    );
+  }
+
+  _onResult(List<Barcode> barcodes) {
+    //print(barcodes);
   }
 }

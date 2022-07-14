@@ -7,8 +7,9 @@ import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart
 
 import 'coordinates_translator.dart';
 
-class BarcodeDetectorPainter extends CustomPainter {
-  BarcodeDetectorPainter(this.barcodes, this.absoluteImageSize, this.rotation);
+class BarcodeDetectorDebugPainter extends CustomPainter {
+  BarcodeDetectorDebugPainter(
+      this.barcodes, this.absoluteImageSize, this.rotation);
 
   final List<Barcode> barcodes;
   final Size absoluteImageSize;
@@ -91,7 +92,7 @@ class BarcodeDetectorPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(BarcodeDetectorPainter oldDelegate) {
+  bool shouldRepaint(BarcodeDetectorDebugPainter oldDelegate) {
     return oldDelegate.absoluteImageSize != absoluteImageSize ||
         oldDelegate.barcodes != barcodes;
   }
