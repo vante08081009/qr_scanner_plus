@@ -39,6 +39,7 @@ class _CameraViewState extends State<QrScannerCameraPlusView>
   final bool _allowPicker = true;
   bool _changingCameraLens = false;
   Timer? _resetFocusModeTimer;
+  bool _waitResetFucusMode = false;
   AccelerometerEvent? _lastAccelerometerEvent;
 
   @override
@@ -126,10 +127,13 @@ class _CameraViewState extends State<QrScannerCameraPlusView>
     _controller?.setFocusMode(FocusMode.locked);
     _controller?.setFocusPoint(point);
 
-    //Switch back to auto-focus after 5 seconds.
+    //Switch back to auto-focus after 20 seconds.
     _resetFocusModeTimer?.cancel();
-    _resetFocusModeTimer = Timer(const Duration(seconds: 5), () {
-      _resetFocusModeTimer?.cancel();
+    _waitResetFucusMode = true;
+    _resetFocusModeTimer = Timer(const Duration(seconds: 20), () {
+      _waitResetFucusMode = false;
+      print("Reset focus mode");
+      _controller?.setFocusMode(FocusMode.auto);
     });
   }
 
@@ -145,10 +149,13 @@ class _CameraViewState extends State<QrScannerCameraPlusView>
             100 ~/
             100;
         if (diff.abs() > 10) {
-          if (_resetFocusModeTimer?.isActive ?? false == true) {
+          if (_resetFocusModeTimer?.isActive == true &&
+              _waitResetFucusMode == true) {
             _resetFocusModeTimer?.cancel();
             print("Reset focus mode");
             _controller?.setFocusMode(FocusMode.auto);
+
+            _waitResetFucusMode = false;
           }
         }
       }
