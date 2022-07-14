@@ -70,6 +70,8 @@ PODS:
   - Protobuf (3.21.2)
   - qr_scanner_plus (0.0.1):
     - Flutter
+  - sensors_plus (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
@@ -78,6 +80,7 @@ DEPENDENCIES:
   - google_mlkit_commons (from `.symlinks/plugins/google_mlkit_commons/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - qr_scanner_plus (from `.symlinks/plugins/qr_scanner_plus/ios`)
+  - sensors_plus (from `.symlinks/plugins/sensors_plus/ios`)
 
 SPEC REPOS:
   trunk:
@@ -108,6 +111,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
   qr_scanner_plus:
     :path: ".symlinks/plugins/qr_scanner_plus/ios"
+  sensors_plus:
+    :path: ".symlinks/plugins/sensors_plus/ios"
 
 SPEC CHECKSUMS:
   camera_avfoundation: 07c77549ea54ad95d8581be86617c094a46280d9
@@ -129,6 +134,7 @@ SPEC CHECKSUMS:
   PromisesObjC: ab77feca74fa2823e7af4249b8326368e61014cb
   Protobuf: 818c6a87e44193a77f56b87c6a1c106efda7e062
   qr_scanner_plus: 4234c44920712d9c812a1f00a58dea4304f437de
+  sensors_plus: 5717760720f7e6acd96fdbd75b7428f5ad755ec2
 
 PODFILE CHECKSUM: 0b6cba515fbe19ea947c893b228501b262002d74
 

@@ -63,8 +63,8 @@ class _CameraViewState extends State<QrScannerCameraPlusView>
     super.dispose();
   }
 
-  _initCamera() async {
-    requestPermission().then((isGranted) {
+  Future _initCamera() async {
+    return requestPermission().then((isGranted) {
       if (isGranted == true) {
         availableCameras().then((value) {
           cameras = value;
@@ -129,12 +129,13 @@ class _CameraViewState extends State<QrScannerCameraPlusView>
     //Switch back to auto-focus after 5 seconds.
     _resetFocusModeTimer?.cancel();
     _resetFocusModeTimer = Timer(const Duration(seconds: 5), () {
-      _autoResetFocusModeByAccelerometer();
+      _resetFocusModeTimer?.cancel();
     });
   }
 
   void _autoResetFocusModeByAccelerometer() {
     //If the user has moved the phone (calc by accelerometer values), switch back to auto-focus.
+
     accelerometerEvents.listen((AccelerometerEvent event) {
       if (_lastAccelerometerEvent != null) {
         var diff = (event.x * event.y * event.z -
@@ -144,8 +145,11 @@ class _CameraViewState extends State<QrScannerCameraPlusView>
             100 ~/
             100;
         if (diff.abs() > 10) {
-          print("Reset focus mode");
-          _controller?.setFocusMode(FocusMode.auto);
+          if (_resetFocusModeTimer?.isActive ?? false == true) {
+            _resetFocusModeTimer?.cancel();
+            print("Reset focus mode");
+            _controller?.setFocusMode(FocusMode.auto);
+          }
         }
       }
       _lastAccelerometerEvent = event;
@@ -246,6 +250,7 @@ class _CameraViewState extends State<QrScannerCameraPlusView>
       _controller?.startImageStream(_processCameraImage);
 
       _handleCameraZoomChange();
+      _autoResetFocusModeByAccelerometer();
     });
   }
 
@@ -327,10 +332,12 @@ class _CameraViewState extends State<QrScannerCameraPlusView>
 
     print("@@@ didChangeAppLifecycleState {$state}");
 
-    if (state == AppLifecycleState.resumed) {
-      _initCamera();
-    } else if (state == AppLifecycleState.paused) {
-      _stopLiveFeed();
+    if (_controller?.value.isInitialized == true) {
+      if (state == AppLifecycleState.resumed) {
+        _controller?.resumePreview();
+      } else if (state == AppLifecycleState.paused) {
+        _controller?.pausePreview();
+      }
     }
   }
 }
