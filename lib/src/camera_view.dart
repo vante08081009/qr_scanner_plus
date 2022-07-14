@@ -106,61 +106,64 @@ class _CameraViewState extends State<QrScannerCameraPlusView>
   }
 
   void _handleCameraZoomChange() {
-    Timer.periodic(Duration(milliseconds: 20), (timer) {
-      if (_controller == null || _controller?.value.isInitialized == false) {
-        return;
-      }
-      if (zoomTarget != 0) {
-        zoomLevel = zoomLevel + zoomTarget;
+    if (_controller?.value.isInitialized == true) {
+      Timer.periodic(Duration(milliseconds: 20), (timer) {
+        if (zoomTarget != 0) {
+          zoomLevel = zoomLevel + zoomTarget;
 
-        if (zoomLevel < minZoomLevel) {
-          zoomLevel = minZoomLevel;
-        } else if (zoomLevel > min(maxZoomLevel, 3)) {
-          zoomLevel = min(maxZoomLevel, 3);
+          if (zoomLevel < minZoomLevel) {
+            zoomLevel = minZoomLevel;
+          } else if (zoomLevel > min(maxZoomLevel, 3)) {
+            zoomLevel = min(maxZoomLevel, 3);
+          }
+          _controller?.setZoomLevel(zoomLevel);
         }
-        _controller?.setZoomLevel(zoomLevel);
-      }
-    });
+      });
+    }
   }
 
   void _handleSetFocusPoint(Offset? point) async {
-    _controller?.setFocusMode(FocusMode.locked);
-    _controller?.setFocusPoint(point);
+    if (_controller?.value.isInitialized == true) {
+      _controller?.setFocusMode(FocusMode.locked);
+      _controller?.setFocusPoint(point);
 
-    //Switch back to auto-focus after 20 seconds.
-    _resetFocusModeTimer?.cancel();
-    _waitResetFucusMode = true;
-    _resetFocusModeTimer = Timer(const Duration(seconds: 20), () {
-      _waitResetFucusMode = false;
-      print("Reset focus mode");
-      _controller?.setFocusMode(FocusMode.auto);
-    });
+      //Switch back to auto-focus after 20 seconds.
+      _resetFocusModeTimer?.cancel();
+      _waitResetFucusMode = true;
+      _resetFocusModeTimer = Timer(const Duration(seconds: 20), () {
+        _waitResetFucusMode = false;
+        print("Reset focus mode");
+        _controller?.setFocusMode(FocusMode.auto);
+      });
+    }
   }
 
   void _autoResetFocusModeByAccelerometer() {
-    //If the user has moved the phone (calc by accelerometer values), switch back to auto-focus.
+    if (_controller?.value.isInitialized == true) {
+      //If the user has moved the phone (calc by accelerometer values), switch back to auto-focus.
 
-    accelerometerEvents.listen((AccelerometerEvent event) {
-      if (_lastAccelerometerEvent != null) {
-        var diff = (event.x * event.y * event.z -
-                _lastAccelerometerEvent!.x *
-                    _lastAccelerometerEvent!.y *
-                    _lastAccelerometerEvent!.z) *
-            100 ~/
-            100;
-        if (diff.abs() > 10) {
-          if (_resetFocusModeTimer?.isActive == true &&
-              _waitResetFucusMode == true) {
-            _resetFocusModeTimer?.cancel();
-            print("Reset focus mode");
-            _controller?.setFocusMode(FocusMode.auto);
+      accelerometerEvents.listen((AccelerometerEvent event) {
+        if (_lastAccelerometerEvent != null) {
+          var diff = (event.x * event.y * event.z -
+                  _lastAccelerometerEvent!.x *
+                      _lastAccelerometerEvent!.y *
+                      _lastAccelerometerEvent!.z) *
+              100 ~/
+              100;
+          if (diff.abs() > 10) {
+            if (_resetFocusModeTimer?.isActive == true &&
+                _waitResetFucusMode == true) {
+              _resetFocusModeTimer?.cancel();
+              print("Reset focus mode");
+              _controller?.setFocusMode(FocusMode.auto);
 
-            _waitResetFucusMode = false;
+              _waitResetFucusMode = false;
+            }
           }
         }
-      }
-      _lastAccelerometerEvent = event;
-    });
+        _lastAccelerometerEvent = event;
+      });
+    }
   }
 
   Widget _liveFeedBody() {
@@ -194,42 +197,42 @@ class _CameraViewState extends State<QrScannerCameraPlusView>
   }
 
   Widget _cameraBody() {
-    if (_controller == null || _controller?.value.isInitialized == false) {
+    if (_controller?.value.isInitialized == true) {
+      final size = MediaQuery.of(context).size;
+      // calculate scale depending on screen and camera ratios
+      // this is actually size.aspectRatio / (1 / camera.aspectRatio)
+      // because camera preview size is received as landscape
+      // but we're calculating for portrait orientation
+      var scale = 9 / 16;
+      try {
+        scale = size.aspectRatio * _controller!.value.aspectRatio;
+      } catch (e) {}
+
+      // to prevent scaling down, invert the value
+      if (scale < 1) scale = 1 / scale;
+
+      return Container(
+        color: Colors.black,
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            Transform.scale(
+              scale: scale,
+              child: Center(
+                child: _changingCameraLens
+                    ? const Center(
+                        child: Text('Changing camera lens'),
+                      )
+                    : CameraPreview(_controller!),
+              ),
+            ),
+            if (widget.customPaint != null) widget.customPaint!,
+          ],
+        ),
+      );
+    } else {
       return const SizedBox.shrink();
     }
-
-    final size = MediaQuery.of(context).size;
-    // calculate scale depending on screen and camera ratios
-    // this is actually size.aspectRatio / (1 / camera.aspectRatio)
-    // because camera preview size is received as landscape
-    // but we're calculating for portrait orientation
-    var scale = 9 / 16;
-    try {
-      scale = size.aspectRatio * _controller!.value.aspectRatio;
-    } catch (e) {}
-
-    // to prevent scaling down, invert the value
-    if (scale < 1) scale = 1 / scale;
-
-    return Container(
-      color: Colors.black,
-      child: Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          Transform.scale(
-            scale: scale,
-            child: Center(
-              child: _changingCameraLens
-                  ? Center(
-                      child: const Text('Changing camera lens'),
-                    )
-                  : CameraPreview(_controller!),
-            ),
-          ),
-          if (widget.customPaint != null) widget.customPaint!,
-        ],
-      ),
-    );
   }
 
   Future _startLiveFeed() async {
