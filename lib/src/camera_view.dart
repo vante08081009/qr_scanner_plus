@@ -10,17 +10,13 @@ import 'package:google_mlkit_commons/google_mlkit_commons.dart';
 class QrScannerCameraPlusView extends StatefulWidget {
   const QrScannerCameraPlusView(
       {Key? key,
-      required this.title,
       required this.customPaint,
-      this.text,
       this.onCameraPermissionDenied,
       required this.onImage,
       this.initialDirection = CameraLensDirection.back})
       : super(key: key);
 
-  final String title;
   final CustomPaint? customPaint;
-  final String? text;
   final Function(InputImage inputImage) onImage;
   final Function()? onCameraPermissionDenied;
   final CameraLensDirection initialDirection;
@@ -113,27 +109,38 @@ class _CameraViewState extends State<QrScannerCameraPlusView> {
     });
   }
 
+  void _handleSetFocusPoint(Offset? point) async {
+    _controller?.setFocusPoint(point);
+  }
+
   Widget _liveFeedBody() {
     return GestureDetector(
-      child: _cameraBody(),
-      onScaleUpdate: (ScaleUpdateDetails details) {
-        double scale = details.scale;
+        child: _cameraBody(),
+        onScaleUpdate: (ScaleUpdateDetails details) {
+          double scale = details.scale;
 
-        if (scale - _lastGestureScale > 0.005) {
-          zoomTarget = 0.3;
-        } else if (_lastGestureScale - scale > 0.005) {
-          zoomTarget = -0.3;
-        } else {
+          if (scale - _lastGestureScale > 0.005) {
+            zoomTarget = 0.3;
+          } else if (_lastGestureScale - scale > 0.005) {
+            zoomTarget = -0.3;
+          } else {
+            zoomTarget = 0;
+          }
+
+          _lastGestureScale = scale;
+        },
+        onScaleEnd: (ScaleEndDetails details) {
           zoomTarget = 0;
-        }
+          _lastGestureScale = 1;
+        },
+        onTapDown: (TapDownDetails details) {
+          final size = MediaQuery.of(context).size;
 
-        _lastGestureScale = scale;
-      },
-      onScaleEnd: (ScaleEndDetails details) {
-        zoomTarget = 0;
-        _lastGestureScale = 1;
-      },
-    );
+          var offset = Offset(details.localPosition.dx / size.width,
+              details.localPosition.dy / size.height);
+
+          _handleSetFocusPoint(offset);
+        });
   }
 
   Widget _cameraBody() {
