@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -16,9 +17,18 @@ class QrResultCache {
 
 class QrScannerPlusView extends StatefulWidget {
   bool debug = false;
+  bool stop = false;
   final Function(List<Barcode> barcodes) onResult;
   QrScannerPlusView(this.onResult, {this.debug = false, Key? key})
       : super(key: key);
+
+  void pause() {
+    stop = true;
+  }
+
+  void resume() {
+    stop = false;
+  }
 
   @override
   _BarcodeScannerViewState createState() => _BarcodeScannerViewState();
@@ -30,6 +40,21 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
   bool _isBusy = false;
   CustomPaint? _customPaint;
   List<QrResultCache> _resultCache = [];
+  Timer? _timerCallbackResult;
+
+  @override
+  void initState() {
+    _timerCallbackResult =
+        Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      if (resultCache.isNotEmpty) {
+        if (widget.stop != true) {
+          widget.onResult.call(resultCache);
+        }
+      }
+    });
+
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -51,7 +76,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
   saveResultCache(List<Barcode> barcodes) {
     if (barcodes.isEmpty) {
       for (final cache in _resultCache) {
-        cache.count = max(0, cache.count - 1);
+        cache.count = max(0, cache.count - 2);
       }
     } else {
       for (final barcode in barcodes) {
@@ -65,9 +90,9 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
         for (final cache in _resultCache) {
           if (cache.barcode.rawValue == barcode.rawValue) {
             cache.barcode = barcode;
-            cache.count = min(30, cache.count + 30);
+            cache.count = min(30, cache.count + 10);
           } else {
-            cache.count = max(0, cache.count - 1);
+            cache.count = max(0, cache.count - 2);
           }
         }
       }
@@ -99,9 +124,6 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
     saveResultCache(tmpBarcodes);
 
     var barcodes = resultCache;
-    if (barcodes.isNotEmpty) {
-      widget.onResult.call(barcodes);
-    }
 
     if (widget.debug == true) {
       if (inputImage.inputImageData?.size != null &&
@@ -110,13 +132,13 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
             barcodes,
             inputImage.inputImageData!.size,
             inputImage.inputImageData!.imageRotation);
-        _customPaint = CustomPaint(painter: painter);
+
+        setState(() {
+          _customPaint = CustomPaint(painter: painter);
+        });
       }
     }
 
     _isBusy = false;
-    if (mounted) {
-      setState(() {});
-    }
   }
 }
