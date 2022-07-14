@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:google_mlkit_commons/google_mlkit_commons.dart';
 
@@ -36,6 +37,8 @@ class _CameraViewState extends State<QrScannerCameraPlusView> {
   double zoomTarget = 0, _lastGestureScale = 1;
   final bool _allowPicker = true;
   bool _changingCameraLens = false;
+  Timer? _resetFocusModeTimer;
+  AccelerometerEvent? _lastAccelerometerEvent;
 
   @override
   void initState() {
@@ -110,7 +113,33 @@ class _CameraViewState extends State<QrScannerCameraPlusView> {
   }
 
   void _handleSetFocusPoint(Offset? point) async {
+    _controller?.setFocusMode(FocusMode.locked);
     _controller?.setFocusPoint(point);
+
+    //Switch back to auto-focus after 5 seconds.
+    _resetFocusModeTimer?.cancel();
+    _resetFocusModeTimer = Timer(const Duration(seconds: 5), () {
+      _autoResetFocusModeByAccelerometer();
+    });
+  }
+
+  void _autoResetFocusModeByAccelerometer() {
+    //If the user has moved the phone (calc by accelerometer values), switch back to auto-focus.
+    accelerometerEvents.listen((AccelerometerEvent event) {
+      if (_lastAccelerometerEvent != null) {
+        var diff = (event.x * event.y * event.z -
+                _lastAccelerometerEvent!.x *
+                    _lastAccelerometerEvent!.y *
+                    _lastAccelerometerEvent!.z) *
+            100 ~/
+            100;
+        if (diff.abs() > 10) {
+          print("Reset focus mode");
+          _controller?.setFocusMode(FocusMode.auto);
+        }
+      }
+      _lastAccelerometerEvent = event;
+    });
   }
 
   Widget _liveFeedBody() {
