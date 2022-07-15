@@ -26,20 +26,18 @@ class _MyAppState extends State<MyApp> {
           title: const Text('BarcodeScannerPlus example'),
         ),
         body: Center(
-          child: _buildBarcodeScannerView(),
-        ),
+            child: QrScannerPlusView(
+          _onResult,
+          debug: true,
+        )),
       ),
     );
   }
 
-  Widget _buildBarcodeScannerView() {
-    return QrScannerPlusView(
-      _onResult,
-      debug: true,
-    );
-  }
-
   _onResult(List<Barcode> barcodes) {
-    //print(barcodes);
+    for (final barcode in barcodes) {
+      print(barcode.type);
+      print(barcode.rawValue);
+    }
   }
 }

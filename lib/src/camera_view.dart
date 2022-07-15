@@ -211,7 +211,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
           zoomTarget = 0;
           _lastGestureScale = 1;
         },
-        onTapDown: (TapDownDetails details) {
+        onTapUp: (TapUpDetails details) {
           final size = MediaQuery.of(context).size;
 
           setState(() {
@@ -249,9 +249,12 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
               scale: scale,
               child: Center(
                 child: _changingCameraLens
-                    ? const Center(
-                        child: Text('Changing camera lens'),
-                      )
+                    ? Container(
+                        color: Colors.black,
+                        child: const Center(
+                            child: CircularProgressIndicator(
+                          color: Colors.white30,
+                        )))
                     : CameraPreview(_cameraController!),
               ),
             ),
@@ -260,7 +263,13 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
         ),
       );
     } else {
-      return const SizedBox.shrink();
+      return SizedBox.expand(
+          child: Container(
+              color: Colors.black,
+              child: const Center(
+                  child: CircularProgressIndicator(
+                color: Colors.white30,
+              ))));
     }
   }
 
