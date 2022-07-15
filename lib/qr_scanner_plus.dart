@@ -124,8 +124,8 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
 
     // uncomment next lines if you want to use a local model
     // make sure to add tflite model to assets/ml
-    final path = 'assets/ml/object_labeler.tflite';
-    final modelPath = await _getModel(path);
+    const model = 'packages/qr_scanner_plus/assets/ml/object_labeler.tflite';
+    final modelPath = await _getModel(model);
     final options = LocalObjectDetectorOptions(
       mode: mode,
       modelPath: modelPath,
@@ -153,17 +153,21 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
 
   Future<String> _getModel(String assetPath) async {
     if (Platform.isAndroid) {
-      return 'flutter_assets/packages/qr_scanner_plus/$assetPath';
+      return 'flutter_assets/$assetPath';
+    } else {
+      final directory = await getApplicationDocumentsDirectory();
+      final path = join(directory.path, assetPath);
+      return path;
     }
-    final path = '${(await getApplicationSupportDirectory()).path}/$assetPath';
-    await Directory(dirname(path)).create(recursive: true);
-    final file = File(path);
-    if (!await file.exists()) {
-      final byteData = await rootBundle.load(assetPath);
-      await file.writeAsBytes(byteData.buffer
-          .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-    }
-    return file.path;
+    // final path = '${(await getApplicationSupportDirectory()).path}/$assetPath';
+    // await Directory(dirname(path)).create(recursive: true);
+    // final file = File(path);
+    // if (!await file.exists()) {
+    //   final byteData = await rootBundle.load(assetPath);
+    //   await file.writeAsBytes(byteData.buffer
+    //       .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+    // }
+    // return file.path;
   }
 
   Future<void> processImage(InputImage inputImage) async {
@@ -176,7 +180,8 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
     final objects = await _objectDetector.processImage(inputImage);
     for (final object in objects) {
       for (final label in object.labels) {
-        print("@@@ label ${label.text} ${label.confidence}");
+        print(
+            "@@@ label index: ${label.index}, label: ${label.text}, confidence: ${label.confidence}");
       }
     }
 

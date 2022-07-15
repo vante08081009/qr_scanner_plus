@@ -29,14 +29,36 @@ Support for iOS > 10.0
 2. and add to **Podfile**
    
 ```ruby
+
+# Enable firebase-hosted models #
+pod 'GoogleMLKit/LinkFirebase'
+
 post_install do |installer|
+
+  # add these lines:
+  installer.pods_project.build_configurations.each do |config|
+    config.build_settings["EXCLUDED_ARCHS[sdk=*]"] = "armv7"
+    config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = $iOSVersion
+  end
+
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
 
 
     target.build_configurations.each do |config|
       config.build_settings['ENABLE_BITCODE'] = 'NO'
+
+      # Enable firebase-hosted ML models
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
+        '$(inherited)',
+        'MLKIT_FIREBASE_MODELS=1',
+      ]
       
+      
+      # https://pub.dev/packages/permission_handler
+      # permission_handler的权限设置（详细参考官网）。
+      # 在dart代码中，如果是通过permission_handler去申请一些应用权限，需要在这里打开对应宏设置。
+      # 否则通过permission_handler获取到的权限状态只是默认值，而不是正确的状态！
       config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
          '$(inherited)',
 
