@@ -3,6 +3,7 @@
 A better qrcode and barcode scanner.
 
 Features:
+- ✅ Offline use (using Google MLKit).
 - ✅ Camera view can click to set focus point.
 - ✅ Camera view can use scale gesture.
 - ✅ Multi qrcode/barcode supported.
