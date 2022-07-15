@@ -19,11 +19,11 @@ Support for iOS > 10.0
 
 ```xml
 <key>NSCameraUsageDescription</key>
-<string></string>
+<string>To take photos and video with your camera</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>To take video with your camera</string>
 <key>NSPhotoLibraryUsageDescription</key>
-<string></string>
-<key>io.flutter.embedded_views_preview</key>
-<true/>
+<string>To access your photos in your Library</string>
 ```
 
 2. and add to **Podfile**
