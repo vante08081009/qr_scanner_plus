@@ -1,7 +1,9 @@
 name: qr_scanner_plus
 description: Qr scanner plus
-version: 0.0.2+3
-homepage: null
+version: 0.0.2+4
+repository: https://github.com/fast-flutter/qr_scanner_plus
+issue_tracker: https://github.com/fast-flutter/qr_scanner_plus/issues
+homepage: https://www.lookingpet.com
 
 environment:
     sdk: ">=2.16.1 <3.0.0"
