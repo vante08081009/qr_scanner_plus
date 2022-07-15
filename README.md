@@ -48,12 +48,6 @@ post_install do |installer|
     target.build_configurations.each do |config|
       config.build_settings['ENABLE_BITCODE'] = 'NO'
 
-      # Enable firebase-hosted ML models
-      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
-        '$(inherited)',
-        'MLKIT_FIREBASE_MODELS=1',
-      ]
-      
       
       # https://pub.dev/packages/permission_handler
       # permission_handler的权限设置（详细参考官网）。
@@ -61,6 +55,9 @@ post_install do |installer|
       # 否则通过permission_handler获取到的权限状态只是默认值，而不是正确的状态！
       config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
          '$(inherited)',
+
+         ## Enable firebase-hosted ML models
+         'MLKIT_FIREBASE_MODELS=1',
 
          ## dart: PermissionGroup.camera
          'PERMISSION_CAMERA=1',
