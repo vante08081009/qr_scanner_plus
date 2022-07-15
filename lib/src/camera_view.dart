@@ -369,19 +369,20 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     for (var i = 0; i < loop; i++) {
       await Future.delayed(const Duration(milliseconds: 100), () {
         setState(() {
-          _focusPointAnimationOpacity = 1;
+          _focusPointAnimationOpacity = 0.5;
         });
       });
-
       await Future.delayed(const Duration(milliseconds: 100), () {
         setState(() {
-          _focusPointAnimationOpacity = 0.5;
+          _focusPointAnimationOpacity = 0.8;
         });
       });
     }
 
-    setState(() {
-      _focusPointAnimationOpacity = 0;
+    await Future.delayed(const Duration(milliseconds: 300), () {
+      setState(() {
+        _focusPointAnimationOpacity = 0;
+      });
     });
   }
 
