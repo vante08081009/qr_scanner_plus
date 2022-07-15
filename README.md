@@ -59,4 +59,4 @@ class _MyAppState extends State<MyApp> {
 ```
 
 ## Screenshot
-![RUNOOB 图标](http://static.runoob.com/images/runoob-logo.png)
+![](https://github.com/fast-flutter/qr_scanner_plus/raw/master/assets/screenshot/1.jpg)
