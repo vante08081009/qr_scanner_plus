@@ -3,11 +3,11 @@
 A better qrcode and barcode scanner.
 
 Features:
-✅ Camera view can click to set focus point.
-✅ Camera view can use scale gesture.
-✅ Multi qrcode is support.
-✅ Simple to use.
-[ ] Automatically find potential QR codes and automatically zoom in and focus
+- ✅ Camera view can click to set focus point.
+- ✅ Camera view can use scale gesture.
+- ✅ Multi qrcode/barcode supported.
+- ✅ Easy to use.
+[ ] Automatically find potential QR codes and automatically zoom in and focus.
 
 ## Getting Started
 
@@ -57,3 +57,6 @@ class _MyAppState extends State<MyApp> {
 }
 
 ```
+
+## Screenshot
+![RUNOOB 图标](http://static.runoob.com/images/runoob-logo.png)
