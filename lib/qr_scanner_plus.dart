@@ -116,7 +116,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
 
     //callback result every 0.5s
     _timerCallbackResult ??=
-        Timer.periodic(const Duration(milliseconds: 500), (timer) {
+        Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (resultCache.isNotEmpty) {
         if (widget.stop != true) {
           widget.onResult.call(resultCache);

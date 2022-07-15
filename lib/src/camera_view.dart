@@ -27,9 +27,10 @@ class CameraView extends StatefulWidget {
 }
 
 class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
-  CameraController? _controller;
+  CameraController? _cameraController;
   File? _image;
   String? _path;
+  Offset _lastFocusPoint = Offset.zero;
   List<CameraDescription> cameras = [];
 
   int _cameraIndex = 0;
@@ -40,6 +41,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   Timer? _resetFocusModeTimer;
   bool _waitResetFucusMode = false;
   AccelerometerEvent? _lastAccelerometerEvent;
+  double _focusPointAnimationOpacity = 0.0;
 
   @override
   void initState() {
@@ -97,7 +99,24 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return _body();
+    return Stack(children: [_body(), _focusPoint()]);
+  }
+
+  Widget _focusPoint() {
+    return Positioned(
+      left: _lastFocusPoint.dx - 32,
+      top: _lastFocusPoint.dy - 32,
+      child: AnimatedOpacity(
+          opacity: _focusPointAnimationOpacity,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.linear,
+          child: const Image(
+              image: AssetImage('assets/images/focus.png',
+                  package: 'qr_scanner_plus'),
+              width: 64,
+              height: 64,
+              fit: BoxFit.contain)),
+    );
   }
 
   Widget _body() {
@@ -105,7 +124,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   }
 
   void _handleCameraZoomChange() {
-    if (_controller?.value.isInitialized == true) {
+    if (_cameraController?.value.isInitialized == true) {
       Timer.periodic(Duration(milliseconds: 20), (timer) {
         if (zoomTarget != 0) {
           zoomLevel = zoomLevel + zoomTarget;
@@ -115,16 +134,16 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
           } else if (zoomLevel > min(maxZoomLevel, 3)) {
             zoomLevel = min(maxZoomLevel, 3);
           }
-          _controller?.setZoomLevel(zoomLevel);
+          _cameraController?.setZoomLevel(zoomLevel);
         }
       });
     }
   }
 
   void _handleSetFocusPoint(Offset? point) async {
-    if (_controller?.value.isInitialized == true) {
-      _controller?.setFocusMode(FocusMode.locked);
-      _controller?.setFocusPoint(point);
+    if (_cameraController?.value.isInitialized == true) {
+      _cameraController?.setFocusMode(FocusMode.locked);
+      _cameraController?.setFocusPoint(point);
 
       //Switch back to auto-focus after 20 seconds.
       _resetFocusModeTimer?.cancel();
@@ -132,13 +151,15 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       _resetFocusModeTimer = Timer(const Duration(seconds: 20), () {
         _waitResetFucusMode = false;
         print("Reset focus mode");
-        _controller?.setFocusMode(FocusMode.auto);
+        _cameraController?.setFocusMode(FocusMode.auto);
       });
+
+      _playFocusPointAnimation();
     }
   }
 
   void _autoResetFocusModeByAccelerometer() {
-    if (_controller?.value.isInitialized == true) {
+    if (_cameraController?.value.isInitialized == true) {
       //If the user has moved the phone (calc by accelerometer values), switch back to auto-focus.
 
       accelerometerEvents.listen((AccelerometerEvent event) {
@@ -154,7 +175,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                 _waitResetFucusMode == true) {
               _resetFocusModeTimer?.cancel();
               print("Reset focus mode");
-              _controller?.setFocusMode(FocusMode.auto);
+              _cameraController?.setFocusMode(FocusMode.auto);
 
               _waitResetFucusMode = false;
             }
@@ -188,6 +209,10 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
         onTapDown: (TapDownDetails details) {
           final size = MediaQuery.of(context).size;
 
+          setState(() {
+            _lastFocusPoint = details.localPosition;
+          });
+
           var offset = Offset(details.localPosition.dx / size.width,
               details.localPosition.dy / size.height);
 
@@ -196,7 +221,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   }
 
   Widget _cameraBody() {
-    if (_controller?.value.isInitialized == true) {
+    if (_cameraController?.value.isInitialized == true) {
       final size = MediaQuery.of(context).size;
       // calculate scale depending on screen and camera ratios
       // this is actually size.aspectRatio / (1 / camera.aspectRatio)
@@ -204,7 +229,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       // but we're calculating for portrait orientation
       var scale = 9 / 16;
       try {
-        scale = size.aspectRatio * _controller!.value.aspectRatio;
+        scale = size.aspectRatio * _cameraController!.value.aspectRatio;
       } catch (e) {}
 
       // to prevent scaling down, invert the value
@@ -222,7 +247,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                     ? const Center(
                         child: Text('Changing camera lens'),
                       )
-                    : CameraPreview(_controller!),
+                    : CameraPreview(_cameraController!),
               ),
             ),
             if (widget.customPaint != null) widget.customPaint!,
@@ -240,23 +265,23 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     }
 
     final camera = cameras[_cameraIndex];
-    _controller = CameraController(
+    _cameraController = CameraController(
       camera,
       ResolutionPreset.high,
       enableAudio: false,
     );
-    _controller?.initialize().then((_) {
+    _cameraController?.initialize().then((_) {
       if (!mounted) {
         return;
       }
-      _controller?.getMinZoomLevel().then((value) {
+      _cameraController?.getMinZoomLevel().then((value) {
         zoomLevel = value;
         minZoomLevel = value;
       });
-      _controller?.getMaxZoomLevel().then((value) {
+      _cameraController?.getMaxZoomLevel().then((value) {
         maxZoomLevel = value;
       });
-      _controller?.startImageStream(_processCameraImage);
+      _cameraController?.startImageStream(_processCameraImage);
 
       _handleCameraZoomChange();
       _autoResetFocusModeByAccelerometer();
@@ -267,9 +292,9 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     if (!mounted) {
       return;
     }
-    await _controller?.stopImageStream();
-    await _controller?.dispose();
-    _controller = null;
+    await _cameraController?.stopImageStream();
+    await _cameraController?.dispose();
+    _cameraController = null;
   }
 
   Future _switchLiveCamera() async {
@@ -335,17 +360,41 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     }
   }
 
+  void _playFocusPointAnimation() async {
+    for (var i = 0; i < 2; i++) {
+      await Future.delayed(const Duration(milliseconds: 100), () {
+        setState(() {
+          _focusPointAnimationOpacity = 1;
+        });
+      });
+
+      await Future.delayed(const Duration(milliseconds: 100), () {
+        setState(() {
+          _focusPointAnimationOpacity = 0.5;
+        });
+      });
+    }
+
+    setState(() {
+      _focusPointAnimationOpacity = 0;
+    });
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
 
     print("@@@ didChangeAppLifecycleState {$state}");
 
-    if (_controller?.value.isInitialized == true) {
+    if (_cameraController?.value.isInitialized == true) {
       if (state == AppLifecycleState.resumed) {
-        _controller?.resumePreview();
+        if (_cameraController?.value.isInitialized ?? false == false) {
+          _initCamera();
+        } else {
+          _cameraController?.resumePreview();
+        }
       } else if (state == AppLifecycleState.paused) {
-        _controller?.pausePreview();
+        _cameraController?.pausePreview();
       }
     }
   }
