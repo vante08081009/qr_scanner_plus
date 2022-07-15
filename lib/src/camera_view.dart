@@ -140,6 +140,10 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     }
   }
 
+  void _resetFocusPoint() async {
+    _cameraController?.setFocusMode(FocusMode.auto);
+  }
+
   void _handleSetFocusPoint(Offset? point) async {
     if (_cameraController?.value.isInitialized == true) {
       _cameraController?.setFocusMode(FocusMode.locked);
@@ -151,7 +155,8 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       _resetFocusModeTimer = Timer(const Duration(seconds: 20), () {
         _waitResetFucusMode = false;
         print("Reset focus mode");
-        _cameraController?.setFocusMode(FocusMode.auto);
+
+        _resetFocusPoint();
       });
 
       _playFocusPointAnimation();
@@ -175,7 +180,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                 _waitResetFucusMode == true) {
               _resetFocusModeTimer?.cancel();
               print("Reset focus mode");
-              _cameraController?.setFocusMode(FocusMode.auto);
+              _resetFocusPoint();
 
               _waitResetFucusMode = false;
             }
@@ -360,8 +365,8 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     }
   }
 
-  void _playFocusPointAnimation() async {
-    for (var i = 0; i < 2; i++) {
+  Future<void> _playFocusPointAnimation({int loop = 2}) async {
+    for (var i = 0; i < loop; i++) {
       await Future.delayed(const Duration(milliseconds: 100), () {
         setState(() {
           _focusPointAnimationOpacity = 1;
