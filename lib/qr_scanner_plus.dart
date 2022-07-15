@@ -1,11 +1,15 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
 import 'src/camera_view.dart';
 import 'src/barcode_detector_debug_painter.dart';
+import 'src/object_detector_painter.dart';
+import 'package:google_mlkit_object_detection/google_mlkit_object_detection.dart';
 
+export 'package:google_mlkit_object_detection/google_mlkit_object_detection.dart';
 export 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
 
 class QrResultCache {
@@ -36,6 +40,7 @@ class QrScannerPlusView extends StatefulWidget {
 
 class _BarcodeScannerViewState extends State<QrScannerPlusView> {
   final BarcodeScanner _barcodeScanner = BarcodeScanner();
+  late ObjectDetector _objectDetector;
   bool _canProcess = true;
   bool _isBusy = false;
   CustomPaint? _customPaint;
@@ -44,6 +49,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
 
   @override
   void initState() {
+    _initializeDetector(DetectionMode.stream);
     super.initState();
   }
 
@@ -105,12 +111,71 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
     }
   }
 
+  void _initializeDetector(DetectionMode mode) async {
+    print('Set detector in mode: $mode');
+
+    // uncomment next lines if you want to use the default model
+    // final options = ObjectDetectorOptions(
+    //     mode: mode, classifyObjects: true, multipleObjects: true);
+    // _objectDetector = ObjectDetector(options: options);
+
+    // uncomment next lines if you want to use a local model
+    // make sure to add tflite model to assets/ml
+    final path = 'assets/ml/object_labeler.tflite';
+    final modelPath = await _getModel(path);
+    final options = LocalObjectDetectorOptions(
+      mode: mode,
+      modelPath: modelPath,
+      classifyObjects: true,
+      multipleObjects: true,
+    );
+    _objectDetector = ObjectDetector(options: options);
+
+    // uncomment next lines if you want to use a remote model
+    // make sure to add model to firebase
+    // final modelName = 'bird-classifier';
+    // final response =
+    //     await FirebaseObjectDetectorModelManager().downloadModel(modelName);
+    // print('Downloaded: $response');
+    // final options = FirebaseObjectDetectorOptions(
+    //   mode: mode,
+    //   modelName: modelName,
+    //   classifyObjects: true,
+    //   multipleObjects: true,
+    // );
+    // _objectDetector = ObjectDetector(options: options);
+
+    _canProcess = true;
+  }
+
+  Future<String> _getModel(String assetPath) async {
+    if (Platform.isAndroid) {
+      return 'flutter_assets/$assetPath';
+    }
+    final path = '${(await getApplicationSupportDirectory()).path}/$assetPath';
+    await Directory(dirname(path)).create(recursive: true);
+    final file = io.File(path);
+    if (!await file.exists()) {
+      final byteData = await rootBundle.load(assetPath);
+      await file.writeAsBytes(byteData.buffer
+          .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+    }
+    return file.path;
+  }
+
   Future<void> processImage(InputImage inputImage) async {
     if (!_canProcess) return;
     if (_isBusy) return;
     _isBusy = true;
 
     final tmpBarcodes = await _barcodeScanner.processImage(inputImage);
+
+    final objects = await _objectDetector.processImage(inputImage);
+    for (final object in objects) {
+      for (final label in object.labels) {
+        print("@@@ label ${label.text} ${label.confidence}");
+      }
+    }
 
     saveResultCache(tmpBarcodes);
 
