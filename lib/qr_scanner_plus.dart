@@ -11,6 +11,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:google_mlkit_object_detection/google_mlkit_object_detection.dart';
+import 'src/coordinates_translator.dart';
 
 export 'package:google_mlkit_object_detection/google_mlkit_object_detection.dart';
 export 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
@@ -183,16 +184,20 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
         // print(
         //     "@@@ label index: ${label.index}, label: ${label.text}, confidence: ${label.confidence}");
 
-        //if barcode 2d
+        //barcode 2d
         if (label.index == 7 && label.confidence > 0.6) {
-          Offset _focusPointOffset = Offset(
-              object.boundingBox.center.dx /
-                  inputImage.inputImageData!.size.width,
-              object.boundingBox.center.dy /
-                  inputImage.inputImageData!.size.height);
+          print("@@@ object.boundingBox.center: ${object.boundingBox.center}");
+          print(
+              "@@@ inputImage.inputImageData!.size: ${inputImage.inputImageData!.size}");
 
-          if (inputImage.inputImageData?.imageRotation ==
-              InputImageRotation.rotation90deg) {
+          Offset _focusPointOffset;
+          if (Platform.isIOS) {
+            _focusPointOffset = Offset(
+                object.boundingBox.center.dx /
+                    inputImage.inputImageData!.size.width,
+                object.boundingBox.center.dy /
+                    inputImage.inputImageData!.size.height);
+          } else {
             _focusPointOffset = Offset(
                 object.boundingBox.center.dx /
                     inputImage.inputImageData!.size.height,
@@ -200,7 +205,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
                     inputImage.inputImageData!.size.width);
           }
 
-          //auto camera focus
+          print("@@@ tmp: ${_focusPointOffset}");
           _cameraView.setCameraFocusPoint(_focusPointOffset);
         }
       }
