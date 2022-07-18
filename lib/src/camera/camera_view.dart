@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'package:camera/camera.dart';
+import 'package:event_bus/event_bus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:google_mlkit_commons/google_mlkit_commons.dart';
+import '../events.dart';
 
 class CameraView extends StatefulWidget {
   const CameraView(
@@ -21,6 +23,10 @@ class CameraView extends StatefulWidget {
   final Function(InputImage inputImage) onImage;
   final Function()? onCameraPermissionDenied;
   final CameraLensDirection initialDirection;
+
+  setCameraFocusPoint(Offset offset) {
+    eventBus.fire(FocusPointEvent(offset));
+  }
 
   @override
   _CameraViewState createState() => _CameraViewState();
@@ -49,6 +55,17 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
     if (mounted) {
       _initCamera();
+
+      eventBus.on<FocusPointEvent>().listen((e) {
+        Offset offset = e.offset;
+
+        final size = MediaQuery.of(context).size;
+
+        _lastFocusPoint =
+            Offset(offset.dx * size.width, offset.dy * size.height);
+
+        _handleSetFocusPoint(offset);
+      });
 
       // Listen to background/resume changes
       WidgetsBinding.instance?.addObserver(this);
