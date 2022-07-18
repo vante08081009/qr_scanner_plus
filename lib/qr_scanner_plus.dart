@@ -155,19 +155,17 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
     if (Platform.isAndroid) {
       return 'flutter_assets/$assetPath';
     } else {
-      final directory = await getApplicationDocumentsDirectory();
-      final path = join(directory.path, assetPath);
-      return path;
+      final path =
+          '${(await getApplicationSupportDirectory()).path}/$assetPath';
+      await Directory(dirname(path)).create(recursive: true);
+      final file = File(path);
+      if (!await file.exists()) {
+        final byteData = await rootBundle.load(assetPath);
+        await file.writeAsBytes(byteData.buffer
+            .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+      }
+      return file.path;
     }
-    // final path = '${(await getApplicationSupportDirectory()).path}/$assetPath';
-    // await Directory(dirname(path)).create(recursive: true);
-    // final file = File(path);
-    // if (!await file.exists()) {
-    //   final byteData = await rootBundle.load(assetPath);
-    //   await file.writeAsBytes(byteData.buffer
-    //       .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-    // }
-    // return file.path;
   }
 
   Future<void> processImage(InputImage inputImage) async {

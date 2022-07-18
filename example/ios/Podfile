@@ -1,8 +1,8 @@
 # Uncomment this line to define a global platform for your project
-# platform :ios, '9.0'
+platform :ios, '10.0'
 
 # Enable firebase-hosted models #
-pod 'GoogleMLKit/LinkFirebase'
+#pod 'GoogleMLKit/LinkFirebase'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -39,6 +39,9 @@ target 'Runner' do
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
+
+$iOSVersion= "10.0"
+
 post_install do |installer|
 
   # add these lines:
@@ -62,8 +65,8 @@ post_install do |installer|
       config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
          '$(inherited)',
 
-        # Enable firebase-hosted ML models
-         'MLKIT_FIREBASE_MODELS=1',
+        # Disable firebase-hosted ML models
+         'MLKIT_FIREBASE_MODELS=0',
 
          ## dart: PermissionGroup.camera
          'PERMISSION_CAMERA=1',
