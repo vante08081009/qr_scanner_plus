@@ -181,32 +181,35 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
     final objects = await _objectDetector.processImage(inputImage);
     for (final object in objects) {
       for (final label in object.labels) {
-        // print(
-        //     "@@@ label index: ${label.index}, label: ${label.text}, confidence: ${label.confidence}");
-
-        //barcode 2d
-        if (label.index == 7 && label.confidence > 0.6) {
-          print("@@@ object.boundingBox.center: ${object.boundingBox.center}");
+        if (label.confidence > 0.7) {
           print(
-              "@@@ inputImage.inputImageData!.size: ${inputImage.inputImageData!.size}");
+              "@@@ label index: ${label.index}, label: ${label.text}, confidence: ${label.confidence}");
 
-          Offset _focusPointOffset;
-          if (Platform.isIOS) {
-            _focusPointOffset = Offset(
-                object.boundingBox.center.dx /
-                    inputImage.inputImageData!.size.width,
-                object.boundingBox.center.dy /
-                    inputImage.inputImageData!.size.height);
-          } else {
-            _focusPointOffset = Offset(
-                object.boundingBox.center.dx /
-                    inputImage.inputImageData!.size.height,
-                object.boundingBox.center.dy /
-                    inputImage.inputImageData!.size.width);
+          //barcode 2d
+          if (label.index == 7) {
+            print(
+                "@@@ object.boundingBox.center: ${object.boundingBox.center}");
+            print(
+                "@@@ inputImage.inputImageData!.size: ${inputImage.inputImageData!.size}");
+
+            Offset _focusPointOffset;
+            if (Platform.isIOS) {
+              _focusPointOffset = Offset(
+                  object.boundingBox.center.dx /
+                      inputImage.inputImageData!.size.width,
+                  object.boundingBox.center.dy /
+                      inputImage.inputImageData!.size.height);
+            } else {
+              _focusPointOffset = Offset(
+                  object.boundingBox.center.dx /
+                      inputImage.inputImageData!.size.height,
+                  object.boundingBox.center.dy /
+                      inputImage.inputImageData!.size.width);
+            }
+
+            print("@@@ tmp: ${_focusPointOffset}");
+            _cameraView.setCameraFocusPoint(_focusPointOffset);
           }
-
-          print("@@@ tmp: ${_focusPointOffset}");
-          _cameraView.setCameraFocusPoint(_focusPointOffset);
         }
       }
     }
