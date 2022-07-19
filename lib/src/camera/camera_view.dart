@@ -188,7 +188,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
         _resetFocusPoint();
       });
 
-      _playFocusPointAnimation().onError((error, stackTrace) => null);
+      _playFocusPointAnimation();
     }
   }
 
@@ -405,21 +405,27 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   Future<void> _playFocusPointAnimation({int loop = 2}) async {
     for (var i = 0; i < loop; i++) {
       await Future.delayed(const Duration(milliseconds: 100), () {
-        setState(() {
-          _focusPointAnimationOpacity = 0.5;
-        });
+        if (mounted) {
+          setState(() {
+            _focusPointAnimationOpacity = 0.5;
+          });
+        }
       });
       await Future.delayed(const Duration(milliseconds: 100), () {
-        setState(() {
-          _focusPointAnimationOpacity = 0.8;
-        });
+        if (mounted) {
+          setState(() {
+            _focusPointAnimationOpacity = 0.8;
+          });
+        }
       });
     }
 
     await Future.delayed(const Duration(milliseconds: 300), () {
-      setState(() {
-        _focusPointAnimationOpacity = 0;
-      });
+      if (mounted) {
+        setState(() {
+          _focusPointAnimationOpacity = 0;
+        });
+      }
     });
   }
 
