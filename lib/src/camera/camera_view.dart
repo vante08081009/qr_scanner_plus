@@ -336,8 +336,11 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     if (!mounted) {
       return;
     }
-    await _cameraController?.stopImageStream();
-    await _cameraController?.dispose();
+    try {
+      await _cameraController?.stopImageStream();
+      await _cameraController?.dispose();
+    } catch (err) {}
+
     _cameraController = null;
   }
 
