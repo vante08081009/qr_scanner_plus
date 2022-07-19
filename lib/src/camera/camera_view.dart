@@ -76,6 +76,8 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _resetFocusModeTimer?.cancel();
+
     _stopLiveFeed();
 
     // Remove background/resume changes listener
