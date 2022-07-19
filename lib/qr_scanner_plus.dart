@@ -224,6 +224,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
 
       if (widget.debug == true) {
         setState(() {
+          if (!mounted) return;
           _customPaint = CustomPaint(
               painter: ObjectDetectorPainter(
                   objects,
@@ -233,6 +234,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
       }
     } else {
       setState(() {
+        if (!mounted) return;
         _customPaint = null;
       });
     }
@@ -252,6 +254,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
           if (inputImage.inputImageData?.size != null &&
               inputImage.inputImageData?.imageRotation != null) {
             setState(() {
+              if (!mounted) return;
               _customPaint2 = CustomPaint(
                   painter: BarcodeDetectorDebugPainter(
                       resultCache,
@@ -268,6 +271,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
         }
       } else {
         setState(() {
+          if (!mounted) return;
           _customPaint2 = null;
         });
       }
