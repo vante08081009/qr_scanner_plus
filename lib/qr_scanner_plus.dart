@@ -65,6 +65,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
   void dispose() {
     _canProcess = false;
     _barcodeScanner.close();
+
     super.dispose();
   }
 
@@ -177,6 +178,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
   }
 
   Future<void> processImage(InputImage inputImage) async {
+    if (!mounted) return;
     if (!_canProcess) return;
     if (_isBusy) return;
     _isBusy = true;
