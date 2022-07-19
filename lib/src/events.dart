@@ -8,3 +8,7 @@ class FocusPointEvent {
 
   FocusPointEvent(this.offset);
 }
+
+class StopPreviewEvent {
+  StopPreviewEvent();
+}

@@ -30,6 +30,10 @@ class CameraView extends StatefulWidget {
     eventBus.fire(FocusPointEvent(offset));
   }
 
+  stopPreview() {
+    eventBus.fire(StopPreviewEvent());
+  }
+
   @override
   _CameraViewState createState() => _CameraViewState();
 }
@@ -67,6 +71,10 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
             Offset(offset.dx * size.width, offset.dy * size.height);
 
         _handleSetFocusPoint(offset);
+      });
+
+      eventBus.on<StopPreviewEvent>().listen((e) {
+        _stopLiveFeed();
       });
 
       // Listen to background/resume changes
