@@ -249,7 +249,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
         if (widget.stop != true) {
           timer.cancel();
           widget.onResult.call(resultCache);
-          _canProcess = false;
+          _isBusy = false;
           return;
         }
 
