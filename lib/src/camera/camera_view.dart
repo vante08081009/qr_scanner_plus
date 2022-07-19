@@ -178,7 +178,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
         _resetFocusPoint();
       });
 
-      _playFocusPointAnimation();
+      _playFocusPointAnimation().onError((error, stackTrace) => null);
     }
   }
 
