@@ -247,6 +247,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
         Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (resultCache.isNotEmpty) {
         if (widget.stop != true) {
+          timer.cancel();
           widget.onResult.call(resultCache);
           _canProcess = false;
           return;
@@ -270,7 +271,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
         });
       }
     });
-    setState(() {});
+
     _isBusy = false;
   }
 }
