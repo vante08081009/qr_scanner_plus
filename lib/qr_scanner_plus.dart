@@ -222,9 +222,8 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
         }
       }
 
-      if (widget.debug == true) {
+      if (widget.debug == true && mounted) {
         setState(() {
-          if (!mounted) return;
           _customPaint = CustomPaint(
               painter: ObjectDetectorPainter(
                   objects,
@@ -233,10 +232,11 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
         });
       }
     } else {
-      setState(() {
-        if (!mounted) return;
-        _customPaint = null;
-      });
+      if (mounted) {
+        setState(() {
+          _customPaint = null;
+        });
+      }
     }
 
     //barcode decode
@@ -252,9 +252,9 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
       if (resultCache.isNotEmpty) {
         if (widget.debug == true) {
           if (inputImage.inputImageData?.size != null &&
-              inputImage.inputImageData?.imageRotation != null) {
+              inputImage.inputImageData?.imageRotation != null &&
+              mounted) {
             setState(() {
-              if (!mounted) return;
               _customPaint2 = CustomPaint(
                   painter: BarcodeDetectorDebugPainter(
                       resultCache,
@@ -270,10 +270,11 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
           return;
         }
       } else {
-        setState(() {
-          if (!mounted) return;
-          _customPaint2 = null;
-        });
+        if (mounted) {
+          setState(() {
+            _customPaint2 = null;
+          });
+        }
       }
     });
 
