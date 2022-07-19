@@ -245,14 +245,9 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
     //callback result every 0.5s
     _timerCallbackResult ??=
         Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      if (resultCache.isNotEmpty) {
-        if (widget.stop != true) {
-          timer.cancel();
-          widget.onResult.call(resultCache);
-          _isBusy = false;
-          return;
-        }
+      if (!mounted) return;
 
+      if (resultCache.isNotEmpty) {
         if (widget.debug == true) {
           if (inputImage.inputImageData?.size != null &&
               inputImage.inputImageData?.imageRotation != null) {
@@ -264,6 +259,12 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
                       inputImage.inputImageData!.imageRotation));
             });
           }
+        }
+
+        if (widget.stop != true) {
+          widget.onResult.call(resultCache);
+          _isBusy = false;
+          return;
         }
       } else {
         setState(() {
