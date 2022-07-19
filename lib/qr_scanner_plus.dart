@@ -64,6 +64,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
   @override
   void dispose() {
     _canProcess = false;
+    _timerCallbackResult?.cancel();
     _barcodeScanner.close();
 
     super.dispose();
