@@ -11,15 +11,17 @@ import 'package:google_mlkit_commons/google_mlkit_commons.dart';
 import '../events.dart';
 
 class CameraView extends StatefulWidget {
-  const CameraView(
+  CameraView(
       {Key? key,
       required this.customPaint,
+      this.customPaint2,
       this.onCameraPermissionDenied,
       required this.onImage,
       this.initialDirection = CameraLensDirection.back})
       : super(key: key);
 
   final CustomPaint? customPaint;
+  final CustomPaint? customPaint2;
   final Function(InputImage inputImage) onImage;
   final Function()? onCameraPermissionDenied;
   final CameraLensDirection initialDirection;
@@ -276,6 +278,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
               ),
             ),
             if (widget.customPaint != null) widget.customPaint!,
+            if (widget.customPaint2 != null) widget.customPaint2!,
           ],
         ),
       );

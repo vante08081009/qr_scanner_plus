@@ -18,7 +18,7 @@ class ObjectDetectorPainter extends CustomPainter {
     final Paint paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.0
-      ..color = Colors.lightGreenAccent;
+      ..color = Colors.lightBlueAccent;
 
     final Paint background = Paint()..color = Color(0x99000000);
 
@@ -30,7 +30,7 @@ class ObjectDetectorPainter extends CustomPainter {
             textDirection: TextDirection.ltr),
       );
       builder.pushStyle(
-          ui.TextStyle(color: Colors.lightGreenAccent, background: background));
+          ui.TextStyle(color: Colors.lightBlue, background: background));
 
       for (final Label label in detectedObject.labels) {
         builder.addText('${label.text} ${label.confidence}\n');

@@ -11,6 +11,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:google_mlkit_object_detection/google_mlkit_object_detection.dart';
+
 import 'src/coordinates_translator.dart';
 
 export 'package:google_mlkit_object_detection/google_mlkit_object_detection.dart';
@@ -48,6 +49,8 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
   bool _canProcess = true;
   bool _isBusy = false;
   CustomPaint? _customPaint;
+  CustomPaint? _customPaint2;
+
   List<QrResultCache> _resultCache = [];
   Timer? _timerCallbackResult;
   late CameraView _cameraView;
@@ -69,6 +72,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
   Widget build(BuildContext context) {
     _cameraView = CameraView(
         customPaint: _customPaint,
+        customPaint2: _customPaint2,
         onImage: (inputImage) {
           processImage(inputImage);
         });
@@ -130,11 +134,12 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
     const model = 'packages/qr_scanner_plus/assets/ml/object_labeler.tflite';
     final modelPath = await _getModel(model);
     final options = LocalObjectDetectorOptions(
-      mode: mode,
-      modelPath: modelPath,
-      classifyObjects: true,
-      multipleObjects: true,
-    );
+        mode: mode,
+        modelPath: modelPath,
+        classifyObjects: true,
+        multipleObjects: true,
+        maximumLabelsPerObject: 3,
+        confidenceThreshold: 0.7);
     _objectDetector = ObjectDetector(options: options);
 
     // uncomment next lines if you want to use a remote model
@@ -176,22 +181,21 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
     if (_isBusy) return;
     _isBusy = true;
 
-    final tmpBarcodes = await _barcodeScanner.processImage(inputImage);
+    //object detect
+    List<DetectedObject> objects =
+        await _objectDetector.processImage(inputImage);
 
-    final objects = await _objectDetector.processImage(inputImage);
-    for (final object in objects) {
-      for (final label in object.labels) {
-        if (label.confidence > 0.7) {
-          print(
-              "@@@ label index: ${label.index}, label: ${label.text}, confidence: ${label.confidence}");
-
-          //barcode 2d
-          if (label.index == 7) {
+    if (objects.isNotEmpty) {
+      for (final object in objects) {
+        for (final label in object.labels) {
+          //2d  barcode
+          if (label.text.isNotEmpty) {
+            // print(
+            //     "@@@ object.boundingBox.center: ${object.boundingBox.center}");
+            // print(
+            //     "@@@ inputImage.inputImageData!.size: ${inputImage.inputImageData!.size}");
             print(
-                "@@@ object.boundingBox.center: ${object.boundingBox.center}");
-            print(
-                "@@@ inputImage.inputImageData!.size: ${inputImage.inputImageData!.size}");
-
+                "@@@ label index: ${label.index}, label: ${label.text}, confidence: ${label.confidence}");
             Offset _focusPointOffset;
             if (Platform.isIOS) {
               _focusPointOffset = Offset(
@@ -207,12 +211,27 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
                       inputImage.inputImageData!.size.width);
             }
 
-            print("@@@ tmp: ${_focusPointOffset}");
+            // print("@@@ tmp: ${_focusPointOffset}");
             _cameraView.setCameraFocusPoint(_focusPointOffset);
           }
         }
       }
+
+      setState(() {
+        _customPaint = CustomPaint(
+            painter: ObjectDetectorPainter(
+                objects,
+                inputImage.inputImageData!.imageRotation,
+                inputImage.inputImageData!.size));
+      });
+    } else {
+      setState(() {
+        _customPaint = null;
+      });
     }
+
+    //barcode decode
+    final tmpBarcodes = await _barcodeScanner.processImage(inputImage);
 
     saveResultCache(tmpBarcodes);
 
@@ -227,19 +246,18 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
         if (widget.debug == true) {
           if (inputImage.inputImageData?.size != null &&
               inputImage.inputImageData?.imageRotation != null) {
-            // final painter = BarcodeDetectorDebugPainter(
-            //     resultCache,
-            //     inputImage.inputImageData!.size,
-            //     inputImage.inputImageData!.imageRotation);
-
             setState(() {
-              //_customPaint = CustomPaint(painter: painter);
+              _customPaint2 = CustomPaint(
+                  painter: BarcodeDetectorDebugPainter(
+                      resultCache,
+                      inputImage.inputImageData!.size,
+                      inputImage.inputImageData!.imageRotation));
             });
           }
         }
       } else {
         setState(() {
-          _customPaint = null;
+          _customPaint2 = null;
         });
       }
     });
