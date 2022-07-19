@@ -188,7 +188,6 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
     if (objects.isNotEmpty) {
       for (final object in objects) {
         for (final label in object.labels) {
-          //2d  barcode
           if (label.text.isNotEmpty) {
             // print(
             //     "@@@ object.boundingBox.center: ${object.boundingBox.center}");
@@ -212,18 +211,23 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
             }
 
             // print("@@@ tmp: ${_focusPointOffset}");
-            _cameraView.setCameraFocusPoint(_focusPointOffset);
+            //if label is 2d  barcode, set the camera focus point
+            if (label.index == 7) {
+              _cameraView.setCameraFocusPoint(_focusPointOffset);
+            }
           }
         }
       }
 
-      setState(() {
-        _customPaint = CustomPaint(
-            painter: ObjectDetectorPainter(
-                objects,
-                inputImage.inputImageData!.imageRotation,
-                inputImage.inputImageData!.size));
-      });
+      if (widget.debug == true) {
+        setState(() {
+          _customPaint = CustomPaint(
+              painter: ObjectDetectorPainter(
+                  objects,
+                  inputImage.inputImageData!.imageRotation,
+                  inputImage.inputImageData!.size));
+        });
+      }
     } else {
       setState(() {
         _customPaint = null;
