@@ -2,12 +2,11 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'package:camera/camera.dart';
-import 'package:event_bus/event_bus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:sensors_plus/sensors_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:google_mlkit_commons/google_mlkit_commons.dart';
+import './focuspoint.dart';
 import '../events.dart';
 
 class CameraView extends StatefulWidget {
@@ -25,35 +24,34 @@ class CameraView extends StatefulWidget {
   final Function(InputImage inputImage) onImage;
   final Function()? onCameraPermissionDenied;
   final CameraLensDirection initialDirection;
+  Offset? _focusPoint;
 
   setCameraFocusPoint(Offset offset) {
-    eventBus.fire(FocusPointEvent(offset));
+    eventBus.fire(SetFocusPointEvent(offset));
   }
 
-  stopPreview() {
-    eventBus.fire(StopPreviewEvent());
-  }
+  // stopPreview() async {
+  //   try {
+  //     await cameraController?.stopImageStream();
+  //   } catch (err) {}
+  // }
 
   @override
   _CameraViewState createState() => _CameraViewState();
 }
 
 class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
-  CameraController? _cameraController;
   File? _image;
   String? _path;
-  Offset _lastFocusPoint = Offset.zero;
   List<CameraDescription> cameras = [];
+  CameraController? cameraController;
+  FocusPoint? focusPoint;
 
   int _cameraIndex = 0;
   double zoomLevel = 1, minZoomLevel = 1, maxZoomLevel = 1;
   double zoomTarget = 0, _lastGestureScale = 1;
   final bool _allowPicker = true;
   bool _changingCameraLens = false;
-  Timer? _resetFocusModeTimer;
-  bool _waitResetFucusMode = false;
-  AccelerometerEvent? _lastAccelerometerEvent;
-  double _focusPointAnimationOpacity = 0.0;
 
   @override
   void initState() {
@@ -62,21 +60,6 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     if (mounted) {
       _initCamera();
 
-      eventBus.on<FocusPointEvent>().listen((e) {
-        Offset offset = e.offset;
-
-        final size = MediaQuery.of(context).size;
-
-        _lastFocusPoint =
-            Offset(offset.dx * size.width, offset.dy * size.height);
-
-        _handleSetFocusPoint(offset);
-      });
-
-      eventBus.on<StopPreviewEvent>().listen((e) {
-        _stopLiveFeed();
-      });
-
       // Listen to background/resume changes
       WidgetsBinding.instance?.addObserver(this);
     }
@@ -84,9 +67,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    _resetFocusModeTimer?.cancel();
-
-    _stopLiveFeed();
+    // widget.stopPreview();
 
     // Remove background/resume changes listener
     WidgetsBinding.instance?.removeObserver(this);
@@ -128,24 +109,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [_body(), _focusPoint()]);
-  }
-
-  Widget _focusPoint() {
-    return Positioned(
-      left: _lastFocusPoint.dx - 32,
-      top: _lastFocusPoint.dy - 32,
-      child: AnimatedOpacity(
-          opacity: _focusPointAnimationOpacity,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.linear,
-          child: const Image(
-              image: AssetImage('assets/images/focus.png',
-                  package: 'qr_scanner_plus'),
-              width: 64,
-              height: 64,
-              fit: BoxFit.contain)),
-    );
+    return Stack(children: [_body(), focusPoint ?? const SizedBox.shrink()]);
   }
 
   Widget _body() {
@@ -153,8 +117,8 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   }
 
   void _handleCameraZoomChange() {
-    if (_cameraController?.value.isInitialized == true) {
-      Timer.periodic(Duration(milliseconds: 20), (timer) {
+    if (cameraController?.value.isInitialized == true) {
+      Timer.periodic(const Duration(milliseconds: 20), (timer) {
         if (zoomTarget != 0) {
           zoomLevel = zoomLevel + zoomTarget;
 
@@ -163,59 +127,8 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
           } else if (zoomLevel > min(maxZoomLevel, 3)) {
             zoomLevel = min(maxZoomLevel, 3);
           }
-          _cameraController?.setZoomLevel(zoomLevel);
+          cameraController?.setZoomLevel(zoomLevel);
         }
-      });
-    }
-  }
-
-  void _resetFocusPoint() async {
-    _cameraController?.setFocusMode(FocusMode.auto);
-  }
-
-  void _handleSetFocusPoint(Offset? point) async {
-    if (_cameraController?.value.isInitialized == true) {
-      _cameraController?.setFocusMode(FocusMode.locked);
-      _cameraController?.setFocusPoint(point);
-
-      //Switch back to auto-focus after 20 seconds.
-      _resetFocusModeTimer?.cancel();
-      _waitResetFucusMode = true;
-      _resetFocusModeTimer = Timer(const Duration(seconds: 20), () {
-        _waitResetFucusMode = false;
-        print("Reset focus mode");
-
-        _resetFocusPoint();
-      });
-
-      _playFocusPointAnimation();
-    }
-  }
-
-  void _autoResetFocusModeByAccelerometer() {
-    if (_cameraController?.value.isInitialized == true) {
-      //If the user has moved the phone (calc by accelerometer values), switch back to auto-focus.
-
-      accelerometerEvents.listen((AccelerometerEvent event) {
-        if (_lastAccelerometerEvent != null) {
-          var diff = (event.x * event.y * event.z -
-                  _lastAccelerometerEvent!.x *
-                      _lastAccelerometerEvent!.y *
-                      _lastAccelerometerEvent!.z) *
-              100 ~/
-              100;
-          if (diff.abs() > 10) {
-            if (_resetFocusModeTimer?.isActive == true &&
-                _waitResetFucusMode == true) {
-              _resetFocusModeTimer?.cancel();
-              print("Reset focus mode");
-              _resetFocusPoint();
-
-              _waitResetFucusMode = false;
-            }
-          }
-        }
-        _lastAccelerometerEvent = event;
       });
     }
   }
@@ -243,19 +156,15 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
         onTapUp: (TapUpDetails details) {
           final size = MediaQuery.of(context).size;
 
-          setState(() {
-            _lastFocusPoint = details.localPosition;
-          });
-
           var offset = Offset(details.localPosition.dx / size.width,
               details.localPosition.dy / size.height);
 
-          _handleSetFocusPoint(offset);
+          focusPoint!.setCameraFocusPoint(offset);
         });
   }
 
   Widget _cameraBody() {
-    if (_cameraController?.value.isInitialized == true) {
+    if (cameraController?.value.isInitialized == true) {
       final size = MediaQuery.of(context).size;
       // calculate scale depending on screen and camera ratios
       // this is actually size.aspectRatio / (1 / camera.aspectRatio)
@@ -263,7 +172,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       // but we're calculating for portrait orientation
       var scale = 9 / 16;
       try {
-        scale = size.aspectRatio * _cameraController!.value.aspectRatio;
+        scale = size.aspectRatio * cameraController!.value.aspectRatio;
       } catch (e) {}
 
       // to prevent scaling down, invert the value
@@ -284,7 +193,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                             child: CircularProgressIndicator(
                           color: Colors.white30,
                         )))
-                    : CameraPreview(_cameraController!),
+                    : CameraPreview(cameraController!),
               ),
             ),
             if (widget.customPaint != null) widget.customPaint!,
@@ -309,43 +218,28 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     }
 
     final camera = cameras[_cameraIndex];
-    _cameraController = CameraController(
+    cameraController = CameraController(
       camera,
       ResolutionPreset.high,
       enableAudio: false,
     );
-    _cameraController?.initialize().then((_) {
+    focusPoint = FocusPoint(cameraController!);
+
+    cameraController?.initialize().then((_) {
       if (!mounted) {
         return;
       }
-      _cameraController?.getMinZoomLevel().then((value) {
+      cameraController?.getMinZoomLevel().then((value) {
         zoomLevel = value;
         minZoomLevel = value;
       });
-      _cameraController?.getMaxZoomLevel().then((value) {
+      cameraController?.getMaxZoomLevel().then((value) {
         maxZoomLevel = value;
       });
-      _cameraController?.startImageStream(_processCameraImage);
+      cameraController?.startImageStream(_processCameraImage);
 
       _handleCameraZoomChange();
-      _autoResetFocusModeByAccelerometer();
     });
-  }
-
-  Future _stopLiveFeed() async {
-    try {
-      await _cameraController?.stopImageStream();
-      await _cameraController?.dispose();
-    } catch (err) {}
-  }
-
-  Future _switchLiveCamera() async {
-    setState(() => _changingCameraLens = true);
-    _cameraIndex = (_cameraIndex + 1) % cameras.length;
-
-    await _stopLiveFeed();
-    await _startLiveFeed();
-    setState(() => _changingCameraLens = false);
   }
 
   Future _processCameraImage(CameraImage image) async {
@@ -402,48 +296,21 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _playFocusPointAnimation({int loop = 2}) async {
-    for (var i = 0; i < loop; i++) {
-      await Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) {
-          setState(() {
-            _focusPointAnimationOpacity = 0.5;
-          });
-        }
-      });
-      await Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) {
-          setState(() {
-            _focusPointAnimationOpacity = 0.8;
-          });
-        }
-      });
-    }
-
-    await Future.delayed(const Duration(milliseconds: 300), () {
-      if (mounted) {
-        setState(() {
-          _focusPointAnimationOpacity = 0;
-        });
-      }
-    });
-  }
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
 
     print("@@@ didChangeAppLifecycleState {$state}");
 
-    if (_cameraController?.value.isInitialized == true) {
+    if (cameraController?.value.isInitialized == true) {
       if (state == AppLifecycleState.resumed) {
-        if (_cameraController?.value.isInitialized ?? false == false) {
+        if (cameraController?.value.isInitialized ?? false == false) {
           _initCamera();
         } else {
-          _cameraController?.resumePreview();
+          cameraController?.resumePreview();
         }
       } else if (state == AppLifecycleState.paused) {
-        _cameraController?.pausePreview();
+        cameraController?.pausePreview();
       }
     }
   }

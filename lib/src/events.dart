@@ -3,10 +3,9 @@ import 'package:event_bus/event_bus.dart';
 
 EventBus eventBus = EventBus();
 
-class FocusPointEvent {
+class SetFocusPointEvent {
   Offset offset;
-
-  FocusPointEvent(this.offset);
+  SetFocusPointEvent(this.offset);
 }
 
 class StopPreviewEvent {

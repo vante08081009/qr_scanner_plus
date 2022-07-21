@@ -9,10 +9,8 @@ import 'src/barcode_detector_debug_painter.dart';
 import 'src/object_detector_painter.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:event_bus/event_bus.dart';
-import 'package:google_mlkit_object_detection/google_mlkit_object_detection.dart';
 
-import 'src/coordinates_translator.dart';
+import 'package:google_mlkit_object_detection/google_mlkit_object_detection.dart';
 
 export 'package:google_mlkit_object_detection/google_mlkit_object_detection.dart';
 export 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
