@@ -16,6 +16,7 @@ class FocusPoint extends StatefulWidget {
 
   resetFocusPoint() {
     if (cameraController.value.isInitialized == true) {
+      print("@@@ resetFocusPoint");
       cameraController.setFocusMode(FocusMode.auto);
     }
   }
@@ -53,6 +54,11 @@ class _FocusPointState extends State<FocusPoint> {
   void initState() {
     super.initState();
 
+    _listenFocusPointEvent();
+    _autoResetFocusModeByAccelerometer();
+  }
+
+  _listenFocusPointEvent() {
     eventBus.on<SetFocusPointEvent>().listen((e) async {
       if (_busy == true) {
         return;
@@ -68,14 +74,12 @@ class _FocusPointState extends State<FocusPoint> {
       await _setFocusPoint(offset);
       _busy = false;
     });
-
-    _autoResetFocusModeByAccelerometer();
   }
 
   _setFocusPoint(Offset? point) async {
     if (widget.cameraController.value.isInitialized == true) {
-      widget.cameraController.setFocusMode(FocusMode.locked);
-      widget.cameraController.setFocusPoint(point);
+      await widget.cameraController.setFocusMode(FocusMode.locked);
+      await widget.cameraController.setFocusPoint(point);
 
       _needAutoResetFocusPoint = false;
       Future.delayed(const Duration(milliseconds: 5000), () {
@@ -123,11 +127,14 @@ class _FocusPointState extends State<FocusPoint> {
                       _lastAccelerometerEvent!.z) *
               100 ~/
               100;
-          if (diff.abs() > 10 && _needAutoResetFocusPoint == true) {
+
+          if (_needAutoResetFocusPoint == true && diff.abs() > 10) {
             widget.resetFocusPoint();
             _needAutoResetFocusPoint = false;
           }
         }
+
+        _lastAccelerometerEvent = event;
       });
     }
   }
