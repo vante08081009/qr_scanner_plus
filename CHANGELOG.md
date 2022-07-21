@@ -1,3 +1,3 @@
-## 0.0.2
+## 0.0.3+1
 
-* Fix document.
+* Fix bugs.
