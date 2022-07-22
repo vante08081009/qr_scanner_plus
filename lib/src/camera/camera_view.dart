@@ -30,12 +30,6 @@ class CameraView extends StatefulWidget {
     eventBus.fire(SetFocusPointEvent(offset));
   }
 
-  // stopPreview() async {
-  //   try {
-  //     await cameraController?.stopImageStream();
-  //   } catch (err) {}
-  // }
-
   @override
   _CameraViewState createState() => _CameraViewState();
 }
@@ -67,8 +61,6 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    // widget.stopPreview();
-
     // Remove background/resume changes listener
     WidgetsBinding.instance?.removeObserver(this);
 
@@ -109,25 +101,24 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [_body(), focusPoint ?? const SizedBox.shrink()]);
-  }
-
-  Widget _body() {
-    return _liveFeedBody();
+    return Stack(
+        children: [_liveFeedBody(), focusPoint ?? const SizedBox.shrink()]);
   }
 
   void _handleCameraZoomChange() {
     if (cameraController?.value.isInitialized == true) {
       Timer.periodic(const Duration(milliseconds: 20), (timer) {
-        if (zoomTarget != 0) {
-          zoomLevel = zoomLevel + zoomTarget;
+        if (mounted) {
+          if (zoomTarget != 0) {
+            zoomLevel = zoomLevel + zoomTarget;
 
-          if (zoomLevel < minZoomLevel) {
-            zoomLevel = minZoomLevel;
-          } else if (zoomLevel > min(maxZoomLevel, 3)) {
-            zoomLevel = min(maxZoomLevel, 3);
+            if (zoomLevel < minZoomLevel) {
+              zoomLevel = minZoomLevel;
+            } else if (zoomLevel > min(maxZoomLevel, 3)) {
+              zoomLevel = min(maxZoomLevel, 3);
+            }
+            cameraController?.setZoomLevel(zoomLevel);
           }
-          cameraController?.setZoomLevel(zoomLevel);
         }
       });
     }
@@ -135,7 +126,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
   Widget _liveFeedBody() {
     return GestureDetector(
-        child: _cameraBody(),
+        child: _cameraPreviewBody(),
         onScaleUpdate: (ScaleUpdateDetails details) {
           double scale = details.scale;
 
@@ -163,7 +154,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
         });
   }
 
-  Widget _cameraBody() {
+  Widget _cameraPreviewBody() {
     if (cameraController?.value.isInitialized == true) {
       final size = MediaQuery.of(context).size;
       // calculate scale depending on screen and camera ratios

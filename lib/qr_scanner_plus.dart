@@ -29,14 +29,6 @@ class QrScannerPlusView extends StatefulWidget {
   QrScannerPlusView(this.onResult, {this.debug = false, Key? key})
       : super(key: key);
 
-  void pause() {
-    stop = true;
-  }
-
-  void resume() {
-    stop = false;
-  }
-
   @override
   _BarcodeScannerViewState createState() => _BarcodeScannerViewState();
 }
