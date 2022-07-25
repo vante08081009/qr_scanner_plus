@@ -30,8 +30,8 @@ Support for iOS > 10.0
    
 ```ruby
 
-# Enable firebase-hosted models #
-pod 'GoogleMLKit/LinkFirebase'
+
+$iOSVersion= "10.0"
 
 post_install do |installer|
 
@@ -56,8 +56,8 @@ post_install do |installer|
       config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
          '$(inherited)',
 
-         ## Enable firebase-hosted ML models
-         'MLKIT_FIREBASE_MODELS=1',
+        # Disable firebase-hosted ML models
+         'MLKIT_FIREBASE_MODELS=0',
 
          ## dart: PermissionGroup.camera
          'PERMISSION_CAMERA=1',
