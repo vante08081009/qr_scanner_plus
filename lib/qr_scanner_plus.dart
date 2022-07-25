@@ -207,6 +207,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
             //if label is 2d  barcode, set the camera focus point
             if (label.index == 7) {
               _cameraView.setCameraFocusPoint(_focusPointOffset);
+              _cameraView.zoomIn();
             }
           }
         }

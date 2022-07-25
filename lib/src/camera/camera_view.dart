@@ -30,6 +30,14 @@ class CameraView extends StatefulWidget {
     eventBus.fire(SetFocusPointEvent(offset));
   }
 
+  zoomIn() {
+    eventBus.fire(ZoomInEvent());
+  }
+
+  zoomOut() {
+    eventBus.fire(ZoomOutEvent());
+  }
+
   @override
   _CameraViewState createState() => _CameraViewState();
 }
@@ -53,6 +61,34 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
     if (mounted) {
       _initCamera();
+
+      eventBus.on<ZoomInEvent>().listen((e) async {
+        if (mounted) {
+          setState(() {
+            zoomLevel += 0.3;
+            if (zoomLevel < minZoomLevel) {
+              zoomLevel = minZoomLevel;
+            } else if (zoomLevel > min(maxZoomLevel, 3)) {
+              zoomLevel = min(maxZoomLevel, 3);
+            }
+            cameraController?.setZoomLevel(zoomLevel);
+          });
+        }
+      });
+
+      eventBus.on<ZoomOutEvent>().listen((e) async {
+        if (mounted) {
+          setState(() {
+            zoomLevel -= 0.3;
+            if (zoomLevel < minZoomLevel) {
+              zoomLevel = minZoomLevel;
+            } else if (zoomLevel > min(maxZoomLevel, 3)) {
+              zoomLevel = min(maxZoomLevel, 3);
+            }
+            cameraController?.setZoomLevel(zoomLevel);
+          });
+        }
+      });
 
       // Listen to background/resume changes
       WidgetsBinding.instance?.addObserver(this);

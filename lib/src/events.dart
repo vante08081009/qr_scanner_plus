@@ -8,6 +8,14 @@ class SetFocusPointEvent {
   SetFocusPointEvent(this.offset);
 }
 
+class ZoomInEvent {
+  ZoomInEvent();
+}
+
+class ZoomOutEvent {
+  ZoomOutEvent();
+}
+
 class StopPreviewEvent {
   StopPreviewEvent();
 }
