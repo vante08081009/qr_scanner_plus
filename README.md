@@ -8,7 +8,7 @@ Features:
 - ✅ Camera view can use scale gesture.
 - ✅ Multi qrcode/barcode supported.
 - ✅ Easy to use.
-- [ x ] Automatically find potential QR codes and automatically zoom in and focus.
+- ✅  Automatically find potential QR codes and automatically zoom in and focus.
 
 ## Getting Started
 
