@@ -76,7 +76,8 @@ post_install do |installer|
   end
 ```
 ### Android
-minSdkVersion 21
+minSdkVersion: 21
+targetSdkVersion: 29
 
 Add to **AndroidManifest.xml**
 

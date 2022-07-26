@@ -28,7 +28,7 @@ class _MyAppState extends State<MyApp> {
         body: Center(
             child: QrScannerPlusView(
           _onResult,
-          debug: false,
+          debug: true,
         )),
       ),
     );

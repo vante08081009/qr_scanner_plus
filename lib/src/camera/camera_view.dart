@@ -64,6 +64,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   double zoomTarget = 0, _lastGestureScale = 1;
   final bool _allowPicker = true;
   bool _changingCameraLens = false;
+  bool paused = false;
 
   @override
   void initState() {
@@ -88,6 +89,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
       eventBus.on<PausePreviewEvent>().listen((e) async {
         if (mounted) {
+          paused = true;
           cameraController?.pausePreview();
           focusPoint?.hide();
         }
@@ -95,6 +97,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
       eventBus.on<ResumePreviewEvent>().listen((e) async {
         if (mounted) {
+          paused = false;
           cameraController?.resumePreview();
         }
       });
@@ -280,6 +283,9 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   }
 
   Future _processCameraImage(CameraImage image) async {
+    if (paused) {
+      return;
+    }
     final WriteBuffer allBytes = WriteBuffer();
     for (final Plane plane in image.planes) {
       allBytes.putUint8List(plane.bytes);
