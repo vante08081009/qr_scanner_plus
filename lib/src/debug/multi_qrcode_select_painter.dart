@@ -30,6 +30,11 @@ class MultiQrcodeSelectPainter extends CustomPainter {
       ..strokeWidth = 16.0
       ..color = Color.fromARGB(200, 79, 193, 154);
 
+    final Paint paintWhite = Paint()
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 3.0
+      ..color = Color.fromARGB(200, 255, 255, 255);
+
     final Paint background = Paint()..color = Color(0x99000000);
 
     for (final Barcode barcode in barcodes) {
@@ -89,6 +94,20 @@ class MultiQrcodeSelectPainter extends CustomPainter {
             Offset(left + (right - left) / 2, top + (bottom - top) / 2),
             20.0,
             paint);
+
+        //draw arrow
+        canvas.drawLine(
+            Offset(left + (right - left) / 2 - 10, top + (bottom - top) / 2),
+            Offset(left + (right - left) / 2 + 10, top + (bottom - top) / 2),
+            paintWhite);
+        canvas.drawLine(
+            Offset(left + (right - left) / 2, top + (bottom - top) / 2 - 10),
+            Offset(left + (right - left) / 2 + 10, top + (bottom - top) / 2),
+            paintWhite);
+        canvas.drawLine(
+            Offset(left + (right - left) / 2, top + (bottom - top) / 2 + 10),
+            Offset(left + (right - left) / 2 + 10, top + (bottom - top) / 2),
+            paintWhite);
       }
 
       _barcodesOnScreen.add({
