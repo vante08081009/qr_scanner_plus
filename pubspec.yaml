@@ -18,12 +18,12 @@ dependencies:
     google_mlkit_barcode_scanning:
         git:
             url: https://github.com/bharat-biradar/Google-Ml-Kit-plugin.git
-            ref: master
+            resolved-ref: "88d55304929ccfe04b696d3cf1d2c145bdda5f72"
             path: packages/google_mlkit_barcode_scanning
     google_mlkit_object_detection:
         git:
             url: https://github.com/bharat-biradar/Google-Ml-Kit-plugin.git
-            ref: master
+            resolved-ref: "88d55304929ccfe04b696d3cf1d2c145bdda5f72"
             path: packages/google_mlkit_object_detection
     path: ^1.8.0
     path_provider: ^2.0.9

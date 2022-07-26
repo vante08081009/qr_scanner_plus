@@ -5,30 +5,30 @@ PODS:
   - google_mlkit_barcode_scanning (0.3.0):
     - Flutter
     - google_mlkit_commons
-    - GoogleMLKit/BarcodeScanning (~> 2.6.0)
+    - GoogleMLKit/BarcodeScanning (~> 3.1.0)
   - google_mlkit_commons (0.2.0):
     - Flutter
     - MLKitVision
   - google_mlkit_object_detection (0.5.0):
     - Flutter
     - google_mlkit_commons
-    - GoogleMLKit/ObjectDetection (~> 2.6.0)
-    - GoogleMLKit/ObjectDetectionCustom (~> 2.6.0)
+    - GoogleMLKit/ObjectDetection (~> 3.1.0)
+    - GoogleMLKit/ObjectDetectionCustom (~> 3.1.0)
   - GoogleDataTransport (9.2.0):
     - GoogleUtilities/Environment (~> 7.7)
     - nanopb (< 2.30910.0, >= 2.30908.0)
     - PromisesObjC (< 3.0, >= 1.2)
-  - GoogleMLKit/BarcodeScanning (2.6.0):
+  - GoogleMLKit/BarcodeScanning (3.1.0):
     - GoogleMLKit/MLKitCore
-    - MLKitBarcodeScanning (~> 1.7.0)
-  - GoogleMLKit/MLKitCore (2.6.0):
-    - MLKitCommon (~> 5.0.0)
-  - GoogleMLKit/ObjectDetection (2.6.0):
+    - MLKitBarcodeScanning (~> 2.1.0)
+  - GoogleMLKit/MLKitCore (3.1.0):
+    - MLKitCommon (~> 7.0.0)
+  - GoogleMLKit/ObjectDetection (3.1.0):
     - GoogleMLKit/MLKitCore
-    - MLKitObjectDetection (~> 1.5.0)
-  - GoogleMLKit/ObjectDetectionCustom (2.6.0):
+    - MLKitObjectDetection (~> 2.1.0)
+  - GoogleMLKit/ObjectDetectionCustom (3.1.0):
     - GoogleMLKit/MLKitCore
-    - MLKitObjectDetectionCustom (~> 1.5.0)
+    - MLKitObjectDetectionCustom (~> 2.1.0)
   - GoogleToolboxForMac/DebugUtils (2.3.2):
     - GoogleToolboxForMac/Defines (= 2.3.2)
   - GoogleToolboxForMac/Defines (2.3.2)
@@ -50,11 +50,11 @@ PODS:
   - GoogleUtilitiesComponents (1.1.0):
     - GoogleUtilities/Logger
   - GTMSessionFetcher/Core (1.7.2)
-  - MLImage (1.0.0-beta2)
-  - MLKitBarcodeScanning (1.7.0):
-    - MLKitCommon (~> 5.0)
-    - MLKitVision (~> 3.0)
-  - MLKitCommon (5.0.0):
+  - MLImage (1.0.0-beta3)
+  - MLKitBarcodeScanning (2.1.0):
+    - MLKitCommon (~> 7.0)
+    - MLKitVision (~> 4.1)
+  - MLKitCommon (7.0.0):
     - GoogleDataTransport (~> 9.0)
     - GoogleToolboxForMac/Logger (~> 2.1)
     - "GoogleToolboxForMac/NSData+zlib (~> 2.1)"
@@ -63,34 +63,34 @@ PODS:
     - GoogleUtilitiesComponents (~> 1.0)
     - GTMSessionFetcher/Core (~> 1.1)
     - Protobuf (~> 3.12)
-  - MLKitImageLabelingCommon (3.0.0):
-    - MLKitCommon (~> 5.0)
-    - MLKitVision (~> 3.0)
-  - MLKitObjectDetection (1.5.0):
-    - MLKitCommon (~> 5.0)
-    - MLKitObjectDetectionCommon (~> 3.0)
-    - MLKitVision (~> 3.0)
-    - MLKitVisionKit (~> 4.0)
-  - MLKitObjectDetectionCommon (3.0.0):
-    - MLKitCommon (~> 5.0)
-    - MLKitVision (~> 3.0)
-  - MLKitObjectDetectionCustom (1.5.0):
-    - MLKitCommon (~> 5.0)
-    - MLKitObjectDetectionCommon (~> 3.0)
-    - MLKitVision (~> 3.0)
-    - MLKitVisionKit (~> 4.0)
-  - MLKitVision (3.0.0):
+  - MLKitImageLabelingCommon (4.1.0):
+    - MLKitCommon (~> 7.0)
+    - MLKitVision (~> 4.1)
+  - MLKitObjectDetection (2.1.0):
+    - MLKitCommon (~> 7.0)
+    - MLKitObjectDetectionCommon (~> 4.1)
+    - MLKitVision (~> 4.1)
+    - MLKitVisionKit (~> 5.1)
+  - MLKitObjectDetectionCommon (4.1.0):
+    - MLKitCommon (~> 7.0)
+    - MLKitVision (~> 4.1)
+  - MLKitObjectDetectionCustom (2.1.0):
+    - MLKitCommon (~> 7.0)
+    - MLKitObjectDetectionCommon (~> 4.1)
+    - MLKitVision (~> 4.1)
+    - MLKitVisionKit (~> 5.1)
+  - MLKitVision (4.1.0):
     - GoogleToolboxForMac/Logger (~> 2.1)
     - "GoogleToolboxForMac/NSData+zlib (~> 2.1)"
     - GTMSessionFetcher/Core (~> 1.1)
-    - MLImage (= 1.0.0-beta2)
-    - MLKitCommon (~> 5.0)
+    - MLImage (= 1.0.0-beta3)
+    - MLKitCommon (~> 7.0)
     - Protobuf (~> 3.12)
-  - MLKitVisionKit (4.0.0):
-    - MLKitCommon (~> 5.0)
-    - MLKitImageLabelingCommon (~> 3.0)
-    - MLKitObjectDetectionCommon (~> 3.0)
-    - MLKitVision (~> 3.0)
+  - MLKitVisionKit (5.1.0):
+    - MLKitCommon (~> 7.0)
+    - MLKitImageLabelingCommon (~> 4.1)
+    - MLKitObjectDetectionCommon (~> 4.1)
+    - MLKitVision (~> 4.1)
   - nanopb (2.30909.0):
     - nanopb/decode (= 2.30909.0)
     - nanopb/encode (= 2.30909.0)
@@ -157,24 +157,24 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   camera_avfoundation: 07c77549ea54ad95d8581be86617c094a46280d9
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
-  google_mlkit_barcode_scanning: 56e88993b6c915ce7134f9d77cb5b2de2fca8cfa
+  google_mlkit_barcode_scanning: 2e06ced03e375c692bd7e8ebcb4df00d3fbfe4aa
   google_mlkit_commons: e9070f57232c3a3e4bd42fdfa621bb1f4bb3e709
-  google_mlkit_object_detection: 9b499a57dddab3f56feb5ed4fc5bae5cc9295cbd
+  google_mlkit_object_detection: 651d617dd0bf45b5acd47c05816c97de77dc83d9
   GoogleDataTransport: 1c8145da7117bd68bbbed00cf304edb6a24de00f
-  GoogleMLKit: 755661c46990a85e42278015f26400286d98ad95
+  GoogleMLKit: 9d072522949ff0ef4dae5359feaf3db2ef2fa658
   GoogleToolboxForMac: 8bef7c7c5cf7291c687cf5354f39f9db6399ad34
   GoogleUtilities: e0913149f6b0625b553d70dae12b49fc62914fd1
   GoogleUtilitiesComponents: 679b2c881db3b615a2777504623df6122dd20afe
   GTMSessionFetcher: 5595ec75acf5be50814f81e9189490412bad82ba
-  MLImage: a454f9f8ecfd537783a12f9488f5be1a68820829
-  MLKitBarcodeScanning: b8257854f6afc1c8443d61ec6b98c28b35625df6
-  MLKitCommon: 3bc17c6f7d25ce3660f030350b46ae7ec9ebca6e
-  MLKitImageLabelingCommon: 9916b03956a3a647ebc7471a12b1eb0798ae84f8
-  MLKitObjectDetection: f30cc178275e463e57ff4434b1450cc96fddccba
-  MLKitObjectDetectionCommon: 81d8ef93327005779a05fb6f2d74b0b0ef8840b1
-  MLKitObjectDetectionCustom: 78c45af5ea04ad40c1d22f4358c495d792d3ef9f
-  MLKitVision: e87dc3f2e456a6ab32361ebd985e078dd2746143
-  MLKitVisionKit: 68c122ceb9b2fe1a05ffe09341c750d566c77170
+  MLImage: 489dfec109f21da8621b28d476401aaf7a0d4ff4
+  MLKitBarcodeScanning: 74f43c38f3f85b3f3f332006b20a1a22f404256c
+  MLKitCommon: 20f4aca0ec2bb37cef2b9c211b50586817bac5d3
+  MLKitImageLabelingCommon: c375a2e9b87b614fe1614f003171455751f39371
+  MLKitObjectDetection: f7dba0862771fa0811c3686e8ebc847235432e2a
+  MLKitObjectDetectionCommon: 6cfa8926341cd835490b496116e2a1b797abf86e
+  MLKitObjectDetectionCustom: afa366749c28a0a8b0522ebefaa164e76ee9733f
+  MLKitVision: 639a171d937241f3fcf92bc1b3ef8f179f49916c
+  MLKitVisionKit: fb450e1ec0b7194aa898bf26b47df897dad93773
   nanopb: b552cce312b6c8484180ef47159bc0f65a1f0431
   path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
   permission_handler_apple: 44366e37eaf29454a1e7b1b7d736c2cceaeb17ce

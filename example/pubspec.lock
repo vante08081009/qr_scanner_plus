@@ -160,8 +160,8 @@ packages:
     dependency: transitive
     description:
       path: "packages/google_mlkit_barcode_scanning"
-      ref: master
-      resolved-ref: "1fa1b6f78e09d36619a0b59379b79e2e27204618"
+      ref: HEAD
+      resolved-ref: "88d55304929ccfe04b696d3cf1d2c145bdda5f72"
       url: "https://github.com/bharat-biradar/Google-Ml-Kit-plugin.git"
     source: git
     version: "0.3.0"
@@ -176,8 +176,8 @@ packages:
     dependency: transitive
     description:
       path: "packages/google_mlkit_object_detection"
-      ref: master
-      resolved-ref: "1fa1b6f78e09d36619a0b59379b79e2e27204618"
+      ref: HEAD
+      resolved-ref: "88d55304929ccfe04b696d3cf1d2c145bdda5f72"
       url: "https://github.com/bharat-biradar/Google-Ml-Kit-plugin.git"
     source: git
     version: "0.5.0"
