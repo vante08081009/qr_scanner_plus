@@ -9,6 +9,7 @@ import '../events.dart';
 class FocusPoint extends StatefulWidget {
   CameraController cameraController;
   FocusPoint(this.cameraController, {Key? key}) : super(key: key);
+  bool _hide = false;
 
   setCameraFocusPoint(Offset offset) {
     eventBus.fire(SetFocusPointEvent(offset));
@@ -19,6 +20,10 @@ class FocusPoint extends StatefulWidget {
       print("@@@ resetFocusPoint");
       cameraController.setFocusMode(FocusMode.auto);
     }
+  }
+
+  hide() {
+    _hide = true;
   }
 
   @override
@@ -37,17 +42,19 @@ class _FocusPointState extends State<FocusPoint> {
     return Positioned(
       left: _lastFocusPoint.dx - 32,
       top: _lastFocusPoint.dy - 32,
-      child: IgnorePointer(
-          child: AnimatedOpacity(
-              opacity: _focusPointAnimationOpacity,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.linear,
-              child: const Image(
-                  image: AssetImage('assets/images/focus.png',
-                      package: 'qr_scanner_plus'),
-                  width: 64,
-                  height: 64,
-                  fit: BoxFit.contain))),
+      child: widget._hide
+          ? const SizedBox.shrink()
+          : IgnorePointer(
+              child: AnimatedOpacity(
+                  opacity: _focusPointAnimationOpacity,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.linear,
+                  child: const Image(
+                      image: AssetImage('assets/images/focus.png',
+                          package: 'qr_scanner_plus'),
+                      width: 64,
+                      height: 64,
+                      fit: BoxFit.contain))),
     );
   }
 

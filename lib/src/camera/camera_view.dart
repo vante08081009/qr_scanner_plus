@@ -14,6 +14,7 @@ class CameraView extends StatefulWidget {
       {Key? key,
       required this.customPaint,
       this.customPaint2,
+      this.customPaint3,
       this.onCameraPermissionDenied,
       required this.onImage,
       this.initialDirection = CameraLensDirection.back})
@@ -21,6 +22,7 @@ class CameraView extends StatefulWidget {
 
   final CustomPaint? customPaint;
   final CustomPaint? customPaint2;
+  final CustomPaint? customPaint3;
   final Function(InputImage inputImage) onImage;
   final Function()? onCameraPermissionDenied;
   final CameraLensDirection initialDirection;
@@ -36,6 +38,14 @@ class CameraView extends StatefulWidget {
 
   zoomOut() {
     eventBus.fire(ZoomOutEvent());
+  }
+
+  pausePreview() {
+    eventBus.fire(PausePreviewEvent());
+  }
+
+  resumePreview() {
+    eventBus.fire(ResumePreviewEvent());
   }
 
   @override
@@ -76,17 +86,16 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
         }
       });
 
-      eventBus.on<ZoomOutEvent>().listen((e) async {
+      eventBus.on<PausePreviewEvent>().listen((e) async {
         if (mounted) {
-          setState(() {
-            zoomLevel -= 0.3;
-            if (zoomLevel < minZoomLevel) {
-              zoomLevel = minZoomLevel;
-            } else if (zoomLevel > min(maxZoomLevel, 3)) {
-              zoomLevel = min(maxZoomLevel, 3);
-            }
-            cameraController?.setZoomLevel(zoomLevel);
-          });
+          cameraController?.pausePreview();
+          focusPoint?.hide();
+        }
+      });
+
+      eventBus.on<ResumePreviewEvent>().listen((e) async {
+        if (mounted) {
+          cameraController?.resumePreview();
         }
       });
 
@@ -225,6 +234,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
             ),
             if (widget.customPaint != null) widget.customPaint!,
             if (widget.customPaint2 != null) widget.customPaint2!,
+            if (widget.customPaint3 != null) widget.customPaint3!,
           ],
         ),
       );

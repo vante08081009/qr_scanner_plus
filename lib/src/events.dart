@@ -16,6 +16,10 @@ class ZoomOutEvent {
   ZoomOutEvent();
 }
 
-class StopPreviewEvent {
-  StopPreviewEvent();
+class PausePreviewEvent {
+  PausePreviewEvent();
+}
+
+class ResumePreviewEvent {
+  ResumePreviewEvent();
 }

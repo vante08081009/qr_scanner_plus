@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
 import 'src/camera/camera_view.dart';
-import 'src/barcode_detector_debug_painter.dart';
-import 'src/object_detector_painter.dart';
+import 'src/debug/barcode_detector_debug_painter.dart';
+import 'src/debug/object_detector_painter.dart';
+import 'src/debug/multi_qrcode_select_painter.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -24,9 +25,10 @@ class QrResultCache {
 
 class QrScannerPlusView extends StatefulWidget {
   bool debug = false;
-  bool stop = false;
-  final Function(List<Barcode> barcodes) onResult;
-  QrScannerPlusView(this.onResult, {this.debug = false, Key? key})
+  bool multiCodeSelect = true;
+  final Function(List<Barcode> barcode) onResult;
+  QrScannerPlusView(this.onResult,
+      {this.debug = false, this.multiCodeSelect = true, Key? key})
       : super(key: key);
 
   @override
@@ -40,6 +42,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
   bool _isBusy = false;
   CustomPaint? _customPaint;
   CustomPaint? _customPaint2;
+  CustomPaint? _customPaint3;
 
   List<QrResultCache> _resultCache = [];
   Timer? _timerCallbackResult;
@@ -65,6 +68,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
     _cameraView = CameraView(
         customPaint: _customPaint,
         customPaint2: _customPaint2,
+        customPaint3: _customPaint3,
         onImage: (inputImage) {
           processImage(inputImage);
         });
@@ -255,7 +259,30 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
           }
         }
 
-        if (widget.stop != true) {
+        //if more then 1 qr code, let user to choose one
+        if (resultCache.length > 1) {
+          if (widget.multiCodeSelect) {
+            _cameraView.pausePreview();
+            setState(() {
+              _customPaint3 = CustomPaint(
+                  painter: MultiQrcodeSelectPainter(
+                      resultCache,
+                      inputImage.inputImageData!.size,
+                      inputImage.inputImageData!.imageRotation,
+                      onMultiSelect));
+            });
+          }
+
+          _isBusy = false;
+        } else {
+          setState(() {
+            _customPaint3 = CustomPaint(
+                painter: MultiQrcodeSelectPainter(
+                    resultCache,
+                    inputImage.inputImageData!.size,
+                    inputImage.inputImageData!.imageRotation,
+                    onMultiSelect));
+          });
           widget.onResult.call(resultCache);
           _isBusy = false;
           return;
@@ -264,11 +291,19 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
         if (mounted) {
           setState(() {
             _customPaint2 = null;
+            _customPaint3 = null;
           });
         }
       }
     });
 
     _isBusy = false;
+  }
+
+  onMultiSelect(Barcode barcode) {
+    setState(() {
+      _customPaint3 = null;
+    });
+    widget.onResult.call([barcode]);
   }
 }
