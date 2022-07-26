@@ -28,7 +28,7 @@ class MultiQrcodeSelectPainter extends CustomPainter {
     final Paint paint = Paint()
       ..style = PaintingStyle.fill
       ..strokeWidth = 16.0
-      ..color = Color.fromARGB(200, 79, 193, 154);
+      ..color = Color.fromARGB(225, 79, 193, 154);
 
     final Paint paintWhite = Paint()
       ..style = PaintingStyle.fill
