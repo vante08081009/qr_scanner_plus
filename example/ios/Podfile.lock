@@ -2,7 +2,7 @@ PODS:
   - camera_avfoundation (0.0.1):
     - Flutter
   - Flutter (1.0.0)
-  - google_mlkit_barcode_scanning (0.3.0):
+  - google_mlkit_barcode_scanning (0.4.0):
     - Flutter
     - google_mlkit_commons
     - GoogleMLKit/BarcodeScanning (~> 3.1.0)
@@ -157,7 +157,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   camera_avfoundation: 07c77549ea54ad95d8581be86617c094a46280d9
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
-  google_mlkit_barcode_scanning: 2e06ced03e375c692bd7e8ebcb4df00d3fbfe4aa
+  google_mlkit_barcode_scanning: 4805cc8281f41915a13f8bbb7223291e982b6836
   google_mlkit_commons: e9070f57232c3a3e4bd42fdfa621bb1f4bb3e709
   google_mlkit_object_detection: 651d617dd0bf45b5acd47c05816c97de77dc83d9
   GoogleDataTransport: 1c8145da7117bd68bbbed00cf304edb6a24de00f

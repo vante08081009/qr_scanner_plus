@@ -1,6 +1,6 @@
 name: qr_scanner_plus
 description: Qr scanner plus
-version: 0.0.5+3
+version: 0.0.5+4
 repository: https://github.com/fast-flutter/qr_scanner_plus
 issue_tracker: https://github.com/fast-flutter/qr_scanner_plus/issues
 homepage: https://www.lookingpet.com
@@ -15,16 +15,9 @@ dependencies:
     flutter:
         sdk: flutter
     get: ^4.6.5
-    google_mlkit_barcode_scanning:
-        git:
-            url: https://github.com/bharat-biradar/Google-Ml-Kit-plugin.git
-            resolved-ref: "88d55304929ccfe04b696d3cf1d2c145bdda5f72"
-            path: packages/google_mlkit_barcode_scanning
-    google_mlkit_object_detection:
-        git:
-            url: https://github.com/bharat-biradar/Google-Ml-Kit-plugin.git
-            resolved-ref: "88d55304929ccfe04b696d3cf1d2c145bdda5f72"
-            path: packages/google_mlkit_object_detection
+    google_mlkit_barcode_scanning: ^0.4.0
+    google_mlkit_commons: ^0.2.0
+    google_mlkit_object_detection: ^0.5.0
     path: ^1.8.0
     path_provider: ^2.0.9
     permission_handler: ^9.2.0

@@ -159,12 +159,10 @@ packages:
   google_mlkit_barcode_scanning:
     dependency: transitive
     description:
-      path: "packages/google_mlkit_barcode_scanning"
-      ref: HEAD
-      resolved-ref: "88d55304929ccfe04b696d3cf1d2c145bdda5f72"
-      url: "https://github.com/bharat-biradar/Google-Ml-Kit-plugin.git"
-    source: git
-    version: "0.3.0"
+      name: google_mlkit_barcode_scanning
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.0"
   google_mlkit_commons:
     dependency: transitive
     description:
@@ -175,11 +173,9 @@ packages:
   google_mlkit_object_detection:
     dependency: transitive
     description:
-      path: "packages/google_mlkit_object_detection"
-      ref: HEAD
-      resolved-ref: "88d55304929ccfe04b696d3cf1d2c145bdda5f72"
-      url: "https://github.com/bharat-biradar/Google-Ml-Kit-plugin.git"
-    source: git
+      name: google_mlkit_object_detection
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "0.5.0"
   js:
     dependency: transitive
@@ -334,7 +330,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.0.5+2"
+    version: "0.0.5+4"
   quiver:
     dependency: transitive
     description:
