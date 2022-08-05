@@ -112,6 +112,9 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     // Remove background/resume changes listener
     WidgetsBinding.instance?.removeObserver(this);
 
+    cameraController?.pausePreview();
+    cameraController?.stopImageStream();
+
     super.dispose();
   }
 
