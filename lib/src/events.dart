@@ -8,6 +8,10 @@ class SetFocusPointEvent {
   SetFocusPointEvent(this.offset);
 }
 
+class ReSetFocusPointEvent {
+  ReSetFocusPointEvent();
+}
+
 class ZoomInEvent {
   ZoomInEvent();
 }

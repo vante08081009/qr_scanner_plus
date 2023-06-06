@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:google_mlkit_commons/google_mlkit_commons.dart';
+import 'package:permission_handler/permission_handler.dart';
+
 import './focuspoint.dart';
 import '../events.dart';
 
@@ -26,10 +28,13 @@ class CameraView extends StatefulWidget {
   final Function(InputImage inputImage) onImage;
   final Function()? onCameraPermissionDenied;
   final CameraLensDirection initialDirection;
-  Offset? _focusPoint;
 
   setCameraFocusPoint(Offset offset) {
     eventBus.fire(SetFocusPointEvent(offset));
+  }
+
+  resetCameraFocusPoint() {
+    eventBus.fire(ReSetFocusPointEvent());
   }
 
   zoomIn() {
@@ -53,8 +58,6 @@ class CameraView extends StatefulWidget {
 }
 
 class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
-  File? _image;
-  String? _path;
   List<CameraDescription> cameras = [];
   CameraController? cameraController;
   FocusPoint? focusPoint;
@@ -62,7 +65,6 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   int _cameraIndex = 0;
   double zoomLevel = 1, minZoomLevel = 1, maxZoomLevel = 1;
   double zoomTarget = 0, _lastGestureScale = 1;
-  final bool _allowPicker = true;
   bool _changingCameraLens = false;
   bool paused = false;
 
@@ -74,21 +76,21 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       _initCamera();
 
       eventBus.on<ZoomInEvent>().listen((e) async {
-        if (mounted) {
+        if (mounted && cameraController?.value.isInitialized == true) {
           setState(() {
-            zoomLevel += 0.3;
+            zoomLevel += 0.4;
             if (zoomLevel < minZoomLevel) {
               zoomLevel = minZoomLevel;
-            } else if (zoomLevel > min(maxZoomLevel, 3)) {
-              zoomLevel = min(maxZoomLevel, 3);
+            } else if (zoomLevel >= min(maxZoomLevel, 1.6)) {
+              zoomLevel = min(maxZoomLevel, 1.6);
             }
-            cameraController?.setZoomLevel(zoomLevel);
+            setZoomLevel(zoomLevel);
           });
         }
       });
 
       eventBus.on<PausePreviewEvent>().listen((e) async {
-        if (mounted) {
+        if (mounted && cameraController?.value.isInitialized == true) {
           paused = true;
           cameraController?.pausePreview();
           focusPoint?.hide();
@@ -96,24 +98,28 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       });
 
       eventBus.on<ResumePreviewEvent>().listen((e) async {
-        if (mounted) {
+        if (mounted && cameraController?.value.isInitialized == true) {
           paused = false;
           cameraController?.resumePreview();
+          focusPoint?.show();
         }
       });
 
       // Listen to background/resume changes
-      WidgetsBinding.instance?.addObserver(this);
+      WidgetsBinding.instance.addObserver(this);
     }
   }
 
   @override
   void dispose() {
     // Remove background/resume changes listener
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
 
-    cameraController?.pausePreview();
-    cameraController?.stopImageStream();
+    if (cameraController?.value.isInitialized == true) {
+      cameraController?.stopImageStream().then((value) {
+        cameraController?.dispose();
+      });
+    }
 
     super.dispose();
   }
@@ -150,6 +156,12 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     });
   }
 
+  void setZoomLevel(double zoom) {
+    if (mounted && cameraController?.value.isInitialized == true) {
+      cameraController?.setZoomLevel(zoomLevel);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -168,7 +180,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
             } else if (zoomLevel > min(maxZoomLevel, 3)) {
               zoomLevel = min(maxZoomLevel, 3);
             }
-            cameraController?.setZoomLevel(zoomLevel);
+            setZoomLevel(zoomLevel);
           }
         }
       });
@@ -201,7 +213,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
           var offset = Offset(details.localPosition.dx / size.width,
               details.localPosition.dy / size.height);
 
-          focusPoint!.setCameraFocusPoint(offset);
+          focusPoint?.setCameraFocusPoint(offset);
         });
   }
 
@@ -263,7 +275,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     final camera = cameras[_cameraIndex];
     cameraController = CameraController(
       camera,
-      ResolutionPreset.high,
+      ResolutionPreset.medium,
       enableAudio: false,
     );
     focusPoint = FocusPoint(cameraController!);
@@ -279,9 +291,12 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       cameraController?.getMaxZoomLevel().then((value) {
         maxZoomLevel = value;
       });
-      cameraController?.startImageStream(_processCameraImage);
 
       _handleCameraZoomChange();
+
+      setState(() {});
+
+      cameraController?.startImageStream(_processCameraImage);
     });
   }
 

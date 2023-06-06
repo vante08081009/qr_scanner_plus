@@ -11,19 +11,22 @@ class FocusPoint extends StatefulWidget {
   FocusPoint(this.cameraController, {Key? key}) : super(key: key);
   bool _hide = false;
 
+  resetFocusPoint() {
+    if (cameraController.value.isInitialized == true) {
+      eventBus.fire(ReSetFocusPointEvent());
+    }
+  }
+
   setCameraFocusPoint(Offset offset) {
     eventBus.fire(SetFocusPointEvent(offset));
   }
 
-  resetFocusPoint() {
-    if (cameraController.value.isInitialized == true) {
-      print("@@@ resetFocusPoint");
-      cameraController.setFocusMode(FocusMode.auto);
-    }
-  }
-
   hide() {
     _hide = true;
+  }
+
+  show() {
+    _hide = false;
   }
 
   @override
@@ -36,6 +39,7 @@ class _FocusPointState extends State<FocusPoint> {
   AccelerometerEvent? _lastAccelerometerEvent;
   bool _needAutoResetFocusPoint = false;
   bool _busy = false;
+  bool _busy_reset = false;
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +72,8 @@ class _FocusPointState extends State<FocusPoint> {
 
   _listenFocusPointEvent() {
     eventBus.on<SetFocusPointEvent>().listen((e) async {
+      if (!mounted) return;
+
       if (_busy == true) {
         return;
       }
@@ -79,15 +85,29 @@ class _FocusPointState extends State<FocusPoint> {
 
       _lastFocusPoint = Offset(offset.dx * size.width, offset.dy * size.height);
 
-      await _setFocusPoint(offset);
-      _busy = false;
+      //cool down time
+      Future.delayed((const Duration(milliseconds: 200)), () {
+        setState(() {
+          _busy = false;
+        });
+      });
+
+      _setFocusPoint(offset);
+    });
+
+    eventBus.on<ReSetFocusPointEvent>().listen((e) async {
+      if (!mounted) return;
+      _resetFocusPoint();
     });
   }
 
   _setFocusPoint(Offset? point) async {
     if (widget.cameraController.value.isInitialized == true) {
       await widget.cameraController.setFocusMode(FocusMode.locked);
-      await widget.cameraController.setFocusPoint(point);
+
+      print("@@@ setFocusPoint: ${point}");
+
+      widget.cameraController.setFocusPoint(point);
 
       _needAutoResetFocusPoint = false;
       Future.delayed(const Duration(milliseconds: 5000), () {
@@ -95,6 +115,27 @@ class _FocusPointState extends State<FocusPoint> {
       });
 
       _playAnimation();
+    }
+  }
+
+  _resetFocusPoint() async {
+    if (!mounted) return;
+
+    if (_busy_reset == true) {
+      return;
+    }
+    _busy_reset = true;
+
+    //cool down time
+    Future.delayed((const Duration(milliseconds: 1000)), () {
+      setState(() {
+        _busy_reset = false;
+      });
+    });
+
+    if (widget.cameraController.value.isInitialized == true) {
+      print("@@@ resetFocusPoint");
+      widget.cameraController.setFocusMode(FocusMode.auto);
     }
   }
 
@@ -137,7 +178,7 @@ class _FocusPointState extends State<FocusPoint> {
               100;
 
           if (_needAutoResetFocusPoint == true && diff.abs() > 10) {
-            widget.resetFocusPoint();
+            _resetFocusPoint();
             _needAutoResetFocusPoint = false;
           }
         }
