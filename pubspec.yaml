@@ -10,7 +10,7 @@ environment:
     flutter: ">=2.5.0"
 
 dependencies:
-    camera: ^0.9.8+1
+    camera: ^0.10.5+2
     event_bus: ^2.0.0
     flutter:
         sdk: flutter

@@ -1,0 +1,20 @@
+# This is a generated file; do not edit or check into version control.
+camera=/Users/tony/.pub-cache/hosted/pub.dartlang.org/camera-0.10.5+2/
+camera_android=/Users/tony/.pub-cache/hosted/pub.dartlang.org/camera_android-0.10.8+2/
+camera_avfoundation=/Users/tony/.pub-cache/hosted/pub.dartlang.org/camera_avfoundation-0.9.13+2/
+camera_web=/Users/tony/.pub-cache/hosted/pub.dartlang.org/camera_web-0.3.1+4/
+flutter_plugin_android_lifecycle=/Users/tony/.pub-cache/hosted/pub.dartlang.org/flutter_plugin_android_lifecycle-2.0.15/
+google_mlkit_barcode_scanning=/Users/tony/.pub-cache/hosted/pub.dartlang.org/google_mlkit_barcode_scanning-0.4.0/
+google_mlkit_commons=/Users/tony/.pub-cache/hosted/pub.dartlang.org/google_mlkit_commons-0.2.0/
+google_mlkit_object_detection=/Users/tony/.pub-cache/hosted/pub.dartlang.org/google_mlkit_object_detection-0.5.0/
+path_provider=/Users/tony/.pub-cache/hosted/pub.dartlang.org/path_provider-2.0.15/
+path_provider_android=/Users/tony/.pub-cache/hosted/pub.dartlang.org/path_provider_android-2.0.27/
+path_provider_foundation=/Users/tony/.pub-cache/hosted/pub.dartlang.org/path_provider_foundation-2.2.3/
+path_provider_linux=/Users/tony/.pub-cache/hosted/pub.dartlang.org/path_provider_linux-2.1.11/
+path_provider_windows=/Users/tony/.pub-cache/hosted/pub.dartlang.org/path_provider_windows-2.1.6/
+permission_handler=/Users/tony/.pub-cache/hosted/pub.dartlang.org/permission_handler-9.2.0/
+permission_handler_android=/Users/tony/.pub-cache/hosted/pub.dartlang.org/permission_handler_android-9.0.2+1/
+permission_handler_apple=/Users/tony/.pub-cache/hosted/pub.dartlang.org/permission_handler_apple-9.0.8/
+permission_handler_windows=/Users/tony/.pub-cache/hosted/pub.dartlang.org/permission_handler_windows-0.1.2/
+sensors_plus=/Users/tony/.pub-cache/hosted/pub.dartlang.org/sensors_plus-1.4.1/
+sensors_plus_web=/Users/tony/.pub-cache/hosted/pub.dartlang.org/sensors_plus_web-1.1.2/
