@@ -275,7 +275,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     final camera = cameras[_cameraIndex];
     cameraController = CameraController(
       camera,
-      ResolutionPreset.medium,
+      ResolutionPreset.veryHigh,
       enableAudio: false,
     );
     focusPoint = FocusPoint(cameraController!);
