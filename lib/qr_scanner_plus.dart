@@ -10,6 +10,7 @@ import 'src/debug/object_detector_painter.dart';
 import 'src/debug/multi_qrcode_select_painter.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:google_mlkit_object_detection/google_mlkit_object_detection.dart';
 
@@ -127,7 +128,8 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
 
     // uncomment next lines if you want to use a local model
     // make sure to add tflite model to assets/ml
-    const model = 'packages/qr_scanner_plus/assets/ml/object_labeler.tflite';
+    //const model = 'packages/qr_scanner_plus/assets/ml/object_labeler.tflite';
+    const model = 'assets/ml/object_labeler.tflite';
     final modelPath = await _getModel(model);
     final options = LocalObjectDetectorOptions(
         mode: mode,
@@ -156,20 +158,21 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
   }
 
   Future<String> _getModel(String assetPath) async {
+    String path = '';
     if (Platform.isAndroid) {
-      return 'flutter_assets/$assetPath';
+      path = '${(await getApplicationDocumentsDirectory()).path}/$assetPath';
     } else {
-      final path =
-          '${(await getApplicationSupportDirectory()).path}/$assetPath';
-      await Directory(dirname(path)).create(recursive: true);
-      final file = File(path);
-      if (!await file.exists()) {
-        final byteData = await rootBundle.load(assetPath);
-        await file.writeAsBytes(byteData.buffer
-            .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-      }
-      return file.path;
+      path = '${(await getApplicationSupportDirectory()).path}/$assetPath';
     }
+    await Directory(dirname(path)).create(recursive: true);
+    final file = File(path);
+    if (!await file.exists()) {
+      final byteData = await rootBundle.load(assetPath);
+      await file.writeAsBytes(byteData.buffer
+          .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+    }
+    return file.path;
+    //}
   }
 
   Future<void> processImage(InputImage inputImage) async {
