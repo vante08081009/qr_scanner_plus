@@ -28,8 +28,12 @@ class QrScannerPlusView extends StatefulWidget {
   bool debug = false;
   bool multiCodeSelect = true;
   final Function(List<Barcode> barcode) onResult;
+  final Color? backgroundColor;
   QrScannerPlusView(this.onResult,
-      {this.debug = false, this.multiCodeSelect = true, Key? key})
+      {this.debug = false,
+      this.multiCodeSelect = true,
+      this.backgroundColor,
+      Key? key})
       : super(key: key);
 
   @override
@@ -72,7 +76,8 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
         customPaint3: _customPaint3,
         onImage: (inputImage) {
           processImage(inputImage);
-        });
+        },
+        backgroundColor: widget.backgroundColor);
 
     return _cameraView;
   }

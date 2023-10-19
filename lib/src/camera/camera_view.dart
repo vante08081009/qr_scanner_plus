@@ -19,7 +19,8 @@ class CameraView extends StatefulWidget {
       this.customPaint3,
       this.onCameraPermissionDenied,
       required this.onImage,
-      this.initialDirection = CameraLensDirection.back})
+      this.initialDirection = CameraLensDirection.back,
+      this.backgroundColor})
       : super(key: key);
 
   final CustomPaint? customPaint;
@@ -28,6 +29,7 @@ class CameraView extends StatefulWidget {
   final Function(InputImage inputImage) onImage;
   final Function()? onCameraPermissionDenied;
   final CameraLensDirection initialDirection;
+  final Color? backgroundColor;
 
   setCameraFocusPoint(Offset offset) {
     eventBus.fire(SetFocusPointEvent(offset));
@@ -233,7 +235,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       if (scale < 1) scale = 1 / scale;
 
       return Container(
-        color: Colors.black,
+        color: widget.backgroundColor ?? Colors.black,
         child: Stack(
           fit: StackFit.expand,
           children: <Widget>[
